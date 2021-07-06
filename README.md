@@ -8,9 +8,28 @@ The Cordova plugin example exports a subset of native Couchbase Lite API functio
 ![](https://i0.wp.com/blog.couchbase.com/wp-content/uploads/2018/10/JS-stuff.jpg?w=900)
 # Exported APIs
 The following list of Couchbase Lite (Android) APIs is exported by the plugin. 
-TBD
+
+This is WIP
+
+| Create Database with specified Configuration | Database |
+|-|-|
+| Create DatabaseConfiguration | DatabaseConfiguration |
+| Close Database | close |
+| copyDatabase | copy |
+| AddChangeListener to listen for database changes | addChangeListener |
+| RemoveChangeListener | removeChangeListener |
+| saveDocumentWith JSONString | Will be provided during project dev (pre-release) |
+| Init mutableDocument | MutableDocument |
+| mutableDocument type set for string | setString |
+| Mutable Document type set for Blob | setBlob |
+| saveBlob  | pre-release) |
+| deleteDocument | deleteDocument(_:) |
+| getDocument | getDocument |
 
 # Build Instructions
+TBD
+
+# Sample Usage Instructions
 TBD
 
 # Sample App
