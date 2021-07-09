@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova.plugin.couchbaselite" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>CouchbaseLitePlugin</name>
+    <js-module name="CouchbaseLitePlugin" src="www/CouchbaseLitePlugin.js">
+        <clobbers target="CouchbaseLitePlugin" />
+    </js-module>
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="CouchbaseLitePlugin">
+                <param name="android-package" value="cordova.plugin.couchbaselite.CouchbaseLitePlugin" />
+            </feature>
+        </config-file>
+        <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+        <source-file src="src/android/CouchbaseLitePlugin.java" target-dir="src/cordova/plugin/couchbaselite/CouchbaseLitePlugin" />
+
+
+        <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
+        <resource-file src="libs/couchbase-lite-android-ee-3.0.0.aar" target="libs/couchbase-lite-android-ee-3.0.0.aar" />
+    </platform>
+
+</plugin>

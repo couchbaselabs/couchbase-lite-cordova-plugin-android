@@ -1,0 +1,25 @@
+{
+  "name": "cordova.plugin.couchbaselite",
+  "version": "1.0.0",
+  "description": "A reference implementation of a cordova native plugin for couchbase lite on Android. In order to use Couchbase Lite as embedded database within your Cordova-based app, you will need a way to access Couchbase Lite’s native APIs from within your Cordova web application. This plugin allows web-based apps running in a Cordova webview to access native platform functionality through a Javascript interface.",
+  "cordova": {
+    "id": "cordova.plugin.couchbaselite",
+    "platforms": [
+      "android"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rajagp/couchbase-lite-cordova-plugin-android.git"
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android"
+  ],
+  "author": "Couchbase",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rajagp/couchbase-lite-cordova-plugin-android/issues"
+  },
+  "homepage": "https://github.com/rajagp/couchbase-lite-cordova-plugin-android#readme"
+}
