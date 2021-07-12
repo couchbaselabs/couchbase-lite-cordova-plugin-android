@@ -11,7 +11,8 @@
             </feature>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
-        <source-file src="src/android/CouchbaseLitePlugin.java" target-dir="src/cordova/plugin/couchbaselite/CouchbaseLitePlugin" />
+        <source-file src="src/android/CouchbaseLitePlugin.java" target-dir="src/cordova/plugin/couchbaselite" />
+        <source-file src="src/android/utils/DatabaseManager.java" target-dir="src/cordova/plugin/couchbaselite/utils" />
 
 
         <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
