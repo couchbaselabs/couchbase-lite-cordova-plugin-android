@@ -11,13 +11,12 @@
             </feature>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+
         <source-file src="src/android/CouchbaseLitePlugin.java" target-dir="src/cordova/plugin/couchbaselite" />
         <source-file src="src/android/utils/DatabaseManager.java" target-dir="src/cordova/plugin/couchbaselite/utils" />
-
 	<source-file src="src/android/objects/DatabaseArgument.java" target-dir="src/cordova/plugin/couchbaselite/objects" />
 	<source-file src="src/android/objects/DatabaseResource.java" target-dir="src/cordova/plugin/couchbaselite/objects" />
 	<source-file src="src/android/objects/DocumentArgument.java" target-dir="src/cordova/plugin/couchbaselite/objects" />
-
 	<source-file src="src/android/enums/ResultCode.java" target-dir="src/cordova/plugin/couchbaselite/enums" />
 
         <framework src="src/android/build.gradle" custom="true" type="gradleReference" />

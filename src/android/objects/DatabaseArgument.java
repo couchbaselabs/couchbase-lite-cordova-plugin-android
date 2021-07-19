@@ -26,9 +26,9 @@ public class DatabaseArgument {
         this.encryptionKey = encryptionKey;
     }
 
-    public String name;
-    public String directory;
-    public String encryptionKey;
+    private String name;
+    private String directory;
+    private String encryptionKey;
 
 
     public DatabaseArgument() {

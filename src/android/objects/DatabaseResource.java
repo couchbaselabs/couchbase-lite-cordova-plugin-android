@@ -2,11 +2,15 @@ package cordova.plugin.couchbaselite.objects;
 
 import com.couchbase.lite.Database;
 import com.couchbase.lite.DatabaseConfiguration;
+import com.couchbase.lite.ListenerToken;
 
 public class DatabaseResource {
 
     private Database database;
     private DatabaseConfiguration configuration;
+
+
+    private ListenerToken listenerToken;
 
 
     public DatabaseResource(Database db, DatabaseConfiguration config) {
@@ -33,6 +37,14 @@ public class DatabaseResource {
 
     public void setConfiguration(DatabaseConfiguration configuration) {
         this.configuration = configuration;
+    }
+
+    public ListenerToken getListenerToken() {
+        return listenerToken;
+    }
+
+    public void setListenerToken(ListenerToken listenerToken) {
+        this.listenerToken = listenerToken;
     }
 
 
