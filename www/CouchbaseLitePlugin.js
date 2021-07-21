@@ -43,3 +43,7 @@ exports.addChangeListener = function (arg0, success, error) {
 exports.removeChangeListener = function (arg0, success, error) {
     exec(success, error, 'CouchbaseLitePlugin', 'removeChangeListener', [arg0])
 }
+
+exports.enableLogging = function (success, error) {
+    exec(success, error, 'CouchbaseLitePlugin', 'enableLogging')
+}

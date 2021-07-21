@@ -1,10 +1,6 @@
 package cordova.plugin.couchbaselite;
 
 import android.content.Context;
-
-import com.couchbase.lite.Database;
-import com.couchbase.lite.DatabaseConfiguration;
-
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 
@@ -14,7 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import cordova.plugin.couchbaselite.enums.ResultCode;
-import cordova.plugin.couchbaselite.objects.DatabaseResource;
 import cordova.plugin.couchbaselite.objects.DocumentArgument;
 import cordova.plugin.couchbaselite.utils.DatabaseManager;
 import cordova.plugin.couchbaselite.objects.DatabaseArgument;
@@ -99,7 +94,7 @@ public class CouchbaseLitePlugin extends CordovaPlugin {
                 deleteDocument(args, callbackContext);
                 return true;
             case ACTION_ENABLE_LOGGING:
-                enableLogging(args, callbackContext);
+                enableLogging(callbackContext);
                 return true;
 
             default:
@@ -521,30 +516,20 @@ public class CouchbaseLitePlugin extends CordovaPlugin {
         }
     }
 
-    private void enableLogging(JSONArray args, CallbackContext callbackContext) {
-       /* try {
-            DatabaseArgument arguments = parseDatabaseArguments(args.getJSONObject(0), callbackContext);
+    private void enableLogging(CallbackContext callbackContext) {
+
             DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-            ResultCode result = dbMgr.enableLogging(arguments);
+            ResultCode result = dbMgr.enableLogging();
 
             PluginResult pluginResult;
             if (result == ResultCode.SUCCESS) {
                 pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
-            } else if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
-                pluginResult = new PluginResult(PluginResult.Status.ERROR, "Database does not exist.");
             } else {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "Error enabling logger for the database.");
             }
 
             pluginResult.setKeepCallback(false);
             callbackContext.sendPluginResult(pluginResult);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Invalid arguments passed in.");
-            pluginResult.setKeepCallback(false);
-            callbackContext.sendPluginResult(pluginResult);
-        }*/
     }
 
     private void deleteDatabase(JSONArray args, CallbackContext callbackContext) {

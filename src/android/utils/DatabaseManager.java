@@ -15,6 +15,8 @@ import com.couchbase.lite.DatabaseConfiguration;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.EncryptionKey;
 import com.couchbase.lite.ListenerToken;
+import com.couchbase.lite.LogDomain;
+import com.couchbase.lite.LogLevel;
 import com.couchbase.lite.MutableDocument;
 import com.couchbase.lite.internal.utils.JSONUtils;
 
@@ -370,8 +372,11 @@ public class DatabaseManager {
         return ResultCode.SUCCESS;
     }
 
-  /*  public ResultCode enableLogging(DatabaseArgument arguments) {
+    public ResultCode enableLogging() {
 
-        return ResultCode.ERROR;
-    }*/
+        Database.log.getConsole().setDomains(LogDomain.ALL_DOMAINS);
+        Database.log.getConsole().setLevel(LogLevel.DEBUG);
+
+        return ResultCode.SUCCESS;
+    }
 }
