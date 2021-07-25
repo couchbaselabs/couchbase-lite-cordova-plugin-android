@@ -109,8 +109,7 @@ public class DatabaseManager {
             }
 
             if (dbName != null && !dbName.equals("")) {
-                DatabaseResource resource = databases.get(dbName);
-                resource.getDatabase().removeChangeListener(resource.getListenerToken());
+                DatabaseResource resource = databases.get(dbName);                
                 resource.getDatabase().delete();
                 databases.remove(dbName);
                 return ResultCode.SUCCESS;
@@ -180,10 +179,7 @@ public class DatabaseManager {
 
             if (dbName != null && !dbName.equals("")) {
 
-                DatabaseResource resource = databases.get(dbName);
-                if (resource.getListenerToken() != null) {
-                    resource.getDatabase().removeChangeListener(resource.getListenerToken());
-                }
+                DatabaseResource resource = databases.get(dbName);                
                 resource.getDatabase().close();
                 return ResultCode.SUCCESS;
             }
