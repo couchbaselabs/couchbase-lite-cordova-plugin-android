@@ -282,7 +282,6 @@ public class DatabaseManager {
         Database db = databases.get(dbName).getDatabase();
         byte[] decodedString = Base64.decode(imageBase64, Base64.DEFAULT);
 
-        // byte[] imageBytes = imageBase64.getBytes("UTF-8");
         Blob blob = new Blob(contentType, decodedString);
         db.saveBlob(blob);
 

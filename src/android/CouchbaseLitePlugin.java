@@ -135,7 +135,7 @@ public class CouchbaseLitePlugin extends CordovaPlugin {
         Context context = this.cordova.getActivity().getApplicationContext();
 
         try {
-            String name = dictionary.has("name") ? dictionary.getString("name").toLowerCase() : null;
+            String name = dictionary.has("dbName") ? dictionary.getString("dbName").toLowerCase() : null;
             String directory = dictionary.has("directory") ? dictionary.getString("directory") : null;
             String encryptionKey = dictionary.has("encryptionKey") ? dictionary.getString("encryptionKey") : null;
 
@@ -168,8 +168,8 @@ public class CouchbaseLitePlugin extends CordovaPlugin {
 
         try {
 
-            String dbName = dictionary.has("database") ? dictionary.getString("database").toLowerCase() : null;
-            String documentId = dictionary.has("id") ? dictionary.getString("id") : null;
+            String dbName = dictionary.has("dbName") ? dictionary.getString("dbName").toLowerCase() : null;
+            String documentId = dictionary.has("docId") ? dictionary.getString("docId") : null;
             JSONObject document = dictionary.has("document") ? (JSONObject) dictionary.get("document") : null;
 
             if (dbName == null || dbName.equals("") || documentId == null || documentId.equals("")) {
@@ -268,7 +268,7 @@ public class CouchbaseLitePlugin extends CordovaPlugin {
             JSONObject params = args.getJSONObject(0);
 
             String imageBase64 = params.getString("imageData");
-            String database = params.getString("database");
+            String database = params.getString("dbName");
             String contentType = params.getString("contentType");
 
             DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
@@ -309,7 +309,7 @@ public class CouchbaseLitePlugin extends CordovaPlugin {
             JSONObject params = args.getJSONObject(0);
 
             JSONObject blob = (JSONObject) params.get("blob");
-            String database = params.getString("database");
+            String database = params.getString("dbName");
 
             DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
             String result = dbMgr.getBlob(blob, database);
@@ -343,7 +343,7 @@ public class CouchbaseLitePlugin extends CordovaPlugin {
         try {
 
             JSONObject params = args.getJSONObject(0);
-            String database = params.getString("database");
+            String database = params.getString("dbName");
 
             DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
             ResultCode result = dbMgr.addChangeListener(database, callbackContext);
@@ -374,7 +374,7 @@ public class CouchbaseLitePlugin extends CordovaPlugin {
         try {
 
             JSONObject params = args.getJSONObject(0);
-            String database = params.getString("database");
+            String database = params.getString("dbName");
 
             DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
             ResultCode result = dbMgr.removeChangeListener(database, callbackContext);
