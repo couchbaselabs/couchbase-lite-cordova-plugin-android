@@ -78,9 +78,9 @@ public class DatabaseManager {
 
             DatabaseConfiguration dbConfig = getDatabaseConfig(dbArgument);
             String dbName = dbArgument.getName();
-            if (databases.get(dbName) != null) {
+           /* if (databases.get(dbName) != null) {
                 return ResultCode.EXIST;
-            }
+            }*/
 
             if (dbName != null && dbConfig != null) {
 
@@ -181,7 +181,9 @@ public class DatabaseManager {
             if (dbName != null && !dbName.equals("")) {
 
                 DatabaseResource resource = databases.get(dbName);
-                resource.getDatabase().removeChangeListener(resource.getListenerToken());
+                if (resource.getListenerToken() != null) {
+                    resource.getDatabase().removeChangeListener(resource.getListenerToken());
+                }
                 resource.getDatabase().close();
                 return ResultCode.SUCCESS;
             }
@@ -263,29 +265,28 @@ public class DatabaseManager {
         return ResultCode.ERROR;
     }
 
-    public String setBlob(String fileURI, String dbName) {
-        try {
-            if (!databases.containsKey(dbName)) {
-                return ResultCode.DATABASE_DOES_NOT_EXIST.toString();
-            }
-
-            if (fileURI.length() > 0) {
-
-                URL fileURL = new URL(fileURI);
-                Database db = databases.get(dbName).getDatabase();
-                Blob blob = new Blob("image", fileURL);
-                db.saveBlob(blob);
-
-                return blob.toJSON();
-
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public String setBlob(String imageBase64, String dbName, String contentType) {
+        if (!databases.containsKey(dbName)) {
+            return ResultCode.DATABASE_DOES_NOT_EXIST.toString();
         }
 
-        return ResultCode.ERROR.toString();
+        if (contentType == null) {
+            return ResultCode.CONTENT_TYPE_DOES_NOT_EXIST.toString();
+        }
+
+        if (imageBase64 == null || imageBase64.length() == 0) {
+            return ResultCode.EMPTY_IMAGE_DATA.toString();
+        }
+
+
+        Database db = databases.get(dbName).getDatabase();
+        byte[] decodedString = Base64.decode(imageBase64, Base64.DEFAULT);
+
+        // byte[] imageBytes = imageBase64.getBytes("UTF-8");
+        Blob blob = new Blob(contentType, decodedString);
+        db.saveBlob(blob);
+
+        return blob.toJSON();
     }
 
     public String getBlob(JSONObject blobObj, String dbName) {

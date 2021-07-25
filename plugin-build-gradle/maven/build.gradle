@@ -1,0 +1,16 @@
+ repositories {
+    maven {
+      url "https://mobile.maven.couchbase.com/maven2/dev/"
+    }
+ }
+
+dependencies {
+    implementation 'com.couchbase.lite:couchbase-lite-android-ee:2.8.5'
+}
+
+android {
+    packagingOptions {
+      exclude 'META-INF/NOTICE'
+      exclude 'META-INF/LICENSE'
+    }
+}

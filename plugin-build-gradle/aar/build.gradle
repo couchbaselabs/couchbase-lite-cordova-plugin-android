@@ -6,7 +6,7 @@ repositories{
 }
 
 dependencies {
-   implementation(name:'couchbase-lite-android-ee-3.0.0', ext:'aar')
+   implementation(name:'couchbase-lite-android', ext:'aar')
 }
 
 android {

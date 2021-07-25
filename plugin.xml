@@ -20,7 +20,7 @@
 	<source-file src="src/android/enums/ResultCode.java" target-dir="src/cordova/plugin/couchbaselite/enums" />
 
         <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
-        <resource-file src="libs/couchbase-lite-android-ee-3.0.0.aar" target="libs/couchbase-lite-android-ee-3.0.0.aar" />
+        <resource-file src="libs/couchbase-lite-android.aar" target="libs/couchbase-lite-android.aar" />
     </platform>
 
 </plugin>

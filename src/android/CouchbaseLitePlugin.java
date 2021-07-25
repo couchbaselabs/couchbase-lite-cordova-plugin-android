@@ -1,6 +1,7 @@
 package cordova.plugin.couchbaselite;
 
 import android.content.Context;
+
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 
@@ -266,17 +267,22 @@ public class CouchbaseLitePlugin extends CordovaPlugin {
 
             JSONObject params = args.getJSONObject(0);
 
-            String fileURI = params.getString("fileURI");
+            String imageBase64 = params.getString("imageData");
             String database = params.getString("database");
+            String contentType = params.getString("contentType");
 
             DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-            String result = dbMgr.setBlob(fileURI, database);
+            String result = dbMgr.setBlob(imageBase64, database, contentType);
 
             PluginResult pluginResult;
             if (result == null) {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "Error setting Blob value.");
+            } else if (result.equals(String.valueOf(ResultCode.EMPTY_IMAGE_DATA))) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "Missing argument image data.");
             } else if (result.equals(String.valueOf(ResultCode.DATABASE_DOES_NOT_EXIST))) {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "Database does not exist.");
+            } else if (result.equals(String.valueOf(ResultCode.CONTENT_TYPE_DOES_NOT_EXIST))) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "Missing argument contentType value.");
             } else if (result.equals(String.valueOf(ResultCode.ERROR))) {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "Error setting Blob value.");
             } else {
@@ -518,18 +524,18 @@ public class CouchbaseLitePlugin extends CordovaPlugin {
 
     private void enableLogging(CallbackContext callbackContext) {
 
-            DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-            ResultCode result = dbMgr.enableLogging();
+        DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
+        ResultCode result = dbMgr.enableLogging();
 
-            PluginResult pluginResult;
-            if (result == ResultCode.SUCCESS) {
-                pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
-            } else {
-                pluginResult = new PluginResult(PluginResult.Status.ERROR, "Error enabling logger for the database.");
-            }
+        PluginResult pluginResult;
+        if (result == ResultCode.SUCCESS) {
+            pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
+        } else {
+            pluginResult = new PluginResult(PluginResult.Status.ERROR, "Error enabling logger for the database.");
+        }
 
-            pluginResult.setKeepCallback(false);
-            callbackContext.sendPluginResult(pluginResult);
+        pluginResult.setKeepCallback(false);
+        callbackContext.sendPluginResult(pluginResult);
     }
 
     private void deleteDatabase(JSONArray args, CallbackContext callbackContext) {
