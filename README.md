@@ -12,19 +12,15 @@ The following list of Couchbase Lite (Android) APIs is exported by the plugin.
 This is WIP
 
 | Create Database with specified Configuration | Database |
-|-|-|
 | Create DatabaseConfiguration | DatabaseConfiguration |
-| Close Database | close |
-| copyDatabase | copy |
-| AddChangeListener to listen for database changes | addChangeListener |
-| RemoveChangeListener | removeChangeListener |
-| saveDocumentWith JSONString | Will be provided during project dev (pre-release) |
-| Init mutableDocument | MutableDocument |
-| mutableDocument type set for string | setString |
-| Mutable Document type set for Blob | setBlob |
-| saveBlob  | pre-release) |
-| deleteDocument | deleteDocument(_:) |
-| getDocument | getDocument |
+| Close Database | Database |
+| copyDatabase | Database |
+| AddChangeListener to listen for database changes | Database |
+| RemoveChangeListener | Database |
+| saveDocument (With JSONString) | MutableDocument |
+| saveBlob  | Database) |
+| deleteDocument | MutableDocument |
+| getDocument | MutableDocument |
 
 # Build Instructions
 TBD
