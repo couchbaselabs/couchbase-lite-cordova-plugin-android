@@ -53,7 +53,7 @@ example: ionic cordova plugin install ../couchbase-lite-cordova-plugin-android
 
 # Sample Usage Instructions
 
-## Declare plugin on top of your component to use: 
+## To use the plugin declare it on top of your component: 
 
 ```declare var CouchbaseLitePlugin: any;```
 
