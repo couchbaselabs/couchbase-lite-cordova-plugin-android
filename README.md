@@ -11,7 +11,7 @@ The following list of Couchbase Lite (Android) APIs is exported by the plugin.
 
 This is WIP
 
-| Create Database with specified Configuration | Database |
+| Create Database (with specified Configuration) | Database |
 | :---: | :---: |
 | Create DatabaseConfiguration | DatabaseConfiguration |
 | Close Database | Database |
@@ -20,6 +20,7 @@ This is WIP
 | RemoveChangeListener | Database |
 | saveDocument (With JSONString) | MutableDocument |
 | saveBlob  | Database |
+| getBlob  | Database |
 | deleteDocument | MutableDocument |
 | getDocument | MutableDocument |
 
