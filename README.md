@@ -71,6 +71,11 @@ e.g.: implementation files('libs/couchbase-lite-android-ee-3.0.0.aar')
     implementation 'com.couchbase.lite:couchbase-lite-android:${version}'
  }
 ```
+## Running Ionic project
+
+```
+ionic cordova run android
+```
 
 
 # Sample Usage Instructions
