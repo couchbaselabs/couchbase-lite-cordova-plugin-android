@@ -34,7 +34,7 @@ This is WIP
 
 This plugin can be integrated in cordova or ionic projects. These steps are for integrating with an Ionic Project.
 
-- Create an ionic project (Starter guide: https://ionicframework.com/docs/developing/starting )
+- Create a blank ionic project without capacitor integration. Choose angular as language. (Starter's Guide: https://ionicframework.com/docs/developing/starting )
 - Install platform android using:
 ``` 
 ionic cordova platform add android
