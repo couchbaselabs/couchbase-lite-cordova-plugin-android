@@ -1,10 +1,15 @@
-package cordova.plugin.couchbaselite.utils;
+package com.couchbase.cblite.utils;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Base64;
 import android.util.Log;
 
+import com.couchbase.cblite.objects.ListenerArgument;
 import com.couchbase.lite.Blob;
 import com.couchbase.lite.CouchbaseLite;
 import com.couchbase.lite.CouchbaseLiteException;
@@ -25,6 +30,7 @@ import org.apache.cordova.PluginResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -32,10 +38,10 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import cordova.plugin.couchbaselite.enums.ResultCode;
-import cordova.plugin.couchbaselite.objects.DatabaseArgument;
-import cordova.plugin.couchbaselite.objects.DatabaseResource;
-import cordova.plugin.couchbaselite.objects.DocumentArgument;
+import com.couchbase.cblite.enums.ResultCode;
+import com.couchbase.cblite.objects.DatabaseArgument;
+import com.couchbase.cblite.objects.DatabaseResource;
+import com.couchbase.cblite.objects.DocumentArgument;
 
 import static com.couchbase.lite.internal.utils.JSONUtils.fromJSON;
 
@@ -78,9 +84,6 @@ public class DatabaseManager {
 
             DatabaseConfiguration dbConfig = getDatabaseConfig(dbArgument);
             String dbName = dbArgument.getName();
-           /* if (databases.get(dbName) != null) {
-                return ResultCode.EXIST;
-            }*/
 
             if (dbName != null && dbConfig != null) {
 
@@ -109,7 +112,7 @@ public class DatabaseManager {
             }
 
             if (dbName != null && !dbName.equals("")) {
-                DatabaseResource resource = databases.get(dbName);                
+                DatabaseResource resource = databases.get(dbName);
                 resource.getDatabase().delete();
                 databases.remove(dbName);
                 return ResultCode.SUCCESS;
@@ -179,7 +182,7 @@ public class DatabaseManager {
 
             if (dbName != null && !dbName.equals("")) {
 
-                DatabaseResource resource = databases.get(dbName);                
+                DatabaseResource resource = databases.get(dbName);
                 resource.getDatabase().close();
                 return ResultCode.SUCCESS;
             }
@@ -220,6 +223,41 @@ public class DatabaseManager {
         return ResultCode.ERROR;
     }
 
+    public String setKeyValuePairDocument(DocumentArgument docArgs) {
+
+        try {
+
+            String docId = docArgs.getId();
+            String dbName = docArgs.getDbName();
+            String key = docArgs.getKeyValue();
+            String value = docArgs.getValueValue();
+
+            if (!databases.containsKey(dbName)) {
+                return ResultCode.DATABASE_DOES_NOT_EXIST.toString();
+            }
+
+            if (docId == null || docId.equals("") || key == null || key.equals("")) {
+                return ResultCode.MISSING_PARAM.toString();
+            }
+
+            Database database = databases.get(dbName).getDatabase();
+
+            Document document = database.getDocument(docId);
+            MutableDocument mutDoc = document != null ? document.toMutable() : new MutableDocument(docId);
+            mutDoc.setString(key, value);
+            database.save(mutDoc);
+
+            Document resultDoc = database.getDocument(docId);
+
+            return resultDoc.toJSON();
+
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
+
+        return ResultCode.ERROR.toString();
+    }
+
     public String getDocument(DocumentArgument docArgs) {
 
         String dbName = docArgs.getDbName();
@@ -227,6 +265,10 @@ public class DatabaseManager {
 
         if (!databases.containsKey(dbName)) {
             return ResultCode.DATABASE_DOES_NOT_EXIST.toString();
+        }
+
+        if (docId == null || docId.equals("")) {
+            return ResultCode.MISSING_PARAM.toString();
         }
 
         Database db = this.databases.get(dbName).getDatabase();
@@ -261,43 +303,204 @@ public class DatabaseManager {
         return ResultCode.ERROR;
     }
 
-    public String setBlob(String imageBase64, String dbName, String contentType) {
-        if (!databases.containsKey(dbName)) {
-            return ResultCode.DATABASE_DOES_NOT_EXIST.toString();
-        }
-
-        if (contentType == null) {
-            return ResultCode.CONTENT_TYPE_DOES_NOT_EXIST.toString();
-        }
-
-        if (imageBase64 == null || imageBase64.length() == 0) {
-            return ResultCode.EMPTY_IMAGE_DATA.toString();
-        }
-
-
-        Database db = databases.get(dbName).getDatabase();
-        byte[] decodedString = Base64.decode(imageBase64, Base64.DEFAULT);
-
-        Blob blob = new Blob(contentType, decodedString);
-        db.saveBlob(blob);
-
-        return blob.toJSON();
-    }
-
-    public String getBlob(JSONObject blobObj, String dbName) {
+    public String createDocumentBlob(DocumentArgument docArgs) {
 
         try {
+            String dbName = docArgs.getDbName();
+            String imageBase64 = docArgs.getBlobData();
+            String contentType = docArgs.getContentType();
+            String documentId = docArgs.getId();
+            String key = docArgs.getKeyValue();
+
             if (!databases.containsKey(dbName)) {
                 return ResultCode.DATABASE_DOES_NOT_EXIST.toString();
             }
 
-            Map<String, Object> map = JSONUtils.fromJSON(blobObj);
+            if (imageBase64 == null || imageBase64.length() == 0) {
+                return ResultCode.EMPTY_IMAGE_DATA.toString();
+            }
+
+            if (documentId == null || documentId.equals("") || key == null || key.equals("") || contentType == null || contentType.equals("")) {
+                return ResultCode.MISSING_PARAM.toString();
+            }
+
+            byte[] decodedString = Base64.decode(imageBase64, Base64.DEFAULT);
+            Blob blob = new Blob(contentType, decodedString);
+
+            Database db = databases.get(dbName).getDatabase();
+            Document doc = db.getDocument(documentId);
+
+            if (doc != null) {
+                MutableDocument mutDoc = doc.toMutable();
+                mutDoc.setBlob(key, blob);
+                db.save(mutDoc);
+                Document newDoc = db.getDocument(documentId);
+                return newDoc.toJSON();
+            } else {
+                return ResultCode.DOCUMENT_DOES_NOT_EXIST.toString();
+            }
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public String createDocumentBlobFromEmbeddedResource(DocumentArgument docArgs, Context context) {
+
+        try {
+            String dbName = docArgs.getDbName();
+            String acResource = docArgs.getAcResource();
+            String contentType = docArgs.getContentType();
+            String documentId = docArgs.getId();
+            String key = docArgs.getKeyValue();
+
+
+            if (!databases.containsKey(dbName)) {
+                return ResultCode.DATABASE_DOES_NOT_EXIST.toString();
+            }
+
+            if (acResource == null || acResource.equals("")) {
+                return ResultCode.EMPTY_IMAGE_DATA.toString();
+            }
+
+            if (documentId == null || documentId.equals("") || key == null || key.equals("") || contentType == null || contentType.equals("")) {
+                return ResultCode.MISSING_PARAM.toString();
+            }
+
+            int drawableResourceId = context.getResources().getIdentifier(acResource, "drawable", context.getPackageName());
+
+            if (drawableResourceId > 0) {
+                Drawable drawable = context.getResources().getDrawable(drawableResourceId, null);
+
+                if (drawable == null) {
+                    return ResultCode.EMPTY_OR_INVALID_IMAGE_DATA.toString();
+                }
+
+                Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                byte[] bitmapByteArr = stream.toByteArray();
+
+                Blob blob = new Blob(contentType, bitmapByteArr);
+                Database db = databases.get(dbName).getDatabase();
+
+                Document doc = db.getDocument(documentId);
+
+                if (doc != null) {
+                    MutableDocument mutDoc = doc.toMutable();
+                    mutDoc.setBlob(key, blob);
+                    db.save(mutDoc);
+                    Document newDoc = db.getDocument(documentId);
+                    return newDoc.toJSON();
+                } else {
+                    return ResultCode.DOCUMENT_DOES_NOT_EXIST.toString();
+                }
+            } else {
+                return ResultCode.EMPTY_IMAGE_DATA.toString();
+            }
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public String createDocumentBlobFromFileURL(DocumentArgument docArgs, Context context) {
+        try {
+            String dbName = docArgs.getDbName();
+            String fileURL = docArgs.getFileUrl();
+            String contentType = docArgs.getContentType();
+            String documentId = docArgs.getId();
+            String key = docArgs.getKeyValue();
+
+
+            if (!databases.containsKey(dbName)) {
+                return ResultCode.DATABASE_DOES_NOT_EXIST.toString();
+            }
+
+            if (fileURL == null) {
+                return ResultCode.EMPTY_IMAGE_DATA.toString();
+            }
+
+            if (documentId == null || documentId.equals("") || key == null || key.equals("") || contentType == null || contentType.equals("")) {
+                return ResultCode.MISSING_PARAM.toString();
+            }
+
+            if (fileURL.startsWith("file://")) {
+                fileURL = fileURL.replace("file://", "");
+            }
+
+            File imgFile = new  File(fileURL);
+
+            if(!imgFile.exists()) {
+                return ResultCode.EMPTY_OR_INVALID_IMAGE_DATA.toString();
+            }
+
+
+            Bitmap bmImg = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+
+            if (bmImg != null) {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bmImg.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                byte[] bitmapByteArr = stream.toByteArray();
+
+                Blob blob = new Blob(contentType, bitmapByteArr);
+                Database db = databases.get(dbName).getDatabase();
+
+                Document doc = db.getDocument(documentId);
+
+                if (doc != null) {
+                    MutableDocument mutDoc = doc.toMutable();
+                    mutDoc.setBlob(key, blob);
+                    db.save(mutDoc);
+
+                    Document newDoc = db.getDocument(documentId);
+                    return newDoc.toJSON();
+                } else {
+                    return ResultCode.DOCUMENT_DOES_NOT_EXIST.toString();
+                }
+
+            } else {
+                return ResultCode.EMPTY_OR_INVALID_IMAGE_DATA.toString();
+            }
+
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public String getBlob(DocumentArgument docArgs) {
+
+        try {
+
+            String dbName = docArgs.getDbName();
+            String blobString = docArgs.getBlobData();
+
+            if (!databases.containsKey(dbName)) {
+                return ResultCode.DATABASE_DOES_NOT_EXIST.toString();
+            }
+
+            if (blobString == null) {
+                return ResultCode.EMPTY_OR_INVALID_IMAGE_DATA.toString();
+            }
+
+            JSONObject blobObject = new JSONObject(blobString);
+            Map<String, Object> map = JSONUtils.fromJSON(blobObject);
 
             Database db = databases.get(dbName).getDatabase();
             Blob blob = db.getBlob(map);
+
+            String contentType = blob.getContentType();
             String imgBase64 = Base64.encodeToString(blob.getContent(), Base64.NO_WRAP);
 
-            return imgBase64;
+            JSONObject result = new JSONObject();
+            result.put("contentType", contentType);
+            result.put("content", imgBase64);
+
+            return result.toString();
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -306,11 +509,10 @@ public class DatabaseManager {
         return ResultCode.ERROR.toString();
     }
 
-    public ResultCode addChangeListener(String database, CallbackContext callbackContext) {
+    public ResultCode addChangeListener(ListenerArgument listenerArgument, CallbackContext callbackContext) {
+
+        String database = listenerArgument.getDatabaseName();
         if (!databases.containsKey(database)) {
-            PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "Database does not exist.");
-            pluginResult.setKeepCallback(false);
-            callbackContext.sendPluginResult(pluginResult);
             return ResultCode.DATABASE_DOES_NOT_EXIST;
         }
 
@@ -318,20 +520,21 @@ public class DatabaseManager {
         Database db = dbResource.getDatabase();
         ListenerToken listenerToken = db.addChangeListener(new DatabaseChangeListener() {
             @Override
-            public void changed(@NonNull DatabaseChange change) {
+            public void changed(DatabaseChange change) {
 
                 if (change != null) {
                     for (String docId : change.getDocumentIDs()) {
                         Document doc = db.getDocument(docId);
                         if (doc != null) {
-                            Log.i("DatabaseChangeEvent", "Document was added/updated");
+
+                            Log.i("DatabaseChangeEvent", "Document: " + doc.getId() + " was modified");
 
                             PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, "DatabaseChangeEvent: Document was added/updated.");
                             pluginResult.setKeepCallback(true);
                             callbackContext.sendPluginResult(pluginResult);
 
                         } else {
-                            Log.i("DatabaseChangeEvent", "Document was deleted");
+                            Log.i("DatabaseChangeEvent", "Document: " + doc.getId() + " was deleted");
 
                             PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, "DatabaseChangeEvent: Document was deleted.");
                             pluginResult.setKeepCallback(true);
@@ -349,12 +552,10 @@ public class DatabaseManager {
         return ResultCode.SUCCESS;
     }
 
-    public ResultCode removeChangeListener(String database, CallbackContext callbackContext) {
+    public ResultCode removeChangeListener(ListenerArgument listenerArgument, CallbackContext callbackContext) {
 
+        String database = listenerArgument.getDatabaseName();
         if (!databases.containsKey(database)) {
-            PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "Database does not exist.");
-            pluginResult.setKeepCallback(false);
-            callbackContext.sendPluginResult(pluginResult);
             return ResultCode.DATABASE_DOES_NOT_EXIST;
         }
 
@@ -375,4 +576,6 @@ public class DatabaseManager {
 
         return ResultCode.SUCCESS;
     }
+
+
 }

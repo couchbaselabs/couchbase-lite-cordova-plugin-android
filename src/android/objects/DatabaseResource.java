@@ -1,4 +1,4 @@
-package cordova.plugin.couchbaselite.objects;
+package com.couchbase.cblite.objects;
 
 import com.couchbase.lite.Database;
 import com.couchbase.lite.DatabaseConfiguration;

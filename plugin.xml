@@ -1,26 +1,24 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="cordova.plugin.couchbaselite" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>CouchbaseLitePlugin</name>
-    <js-module name="CouchbaseLitePlugin" src="www/CouchbaseLitePlugin.js">
-        <clobbers target="CouchbaseLitePlugin" />
+    <js-module name="cblite" src="www/cblite.js">
+        <clobbers target="cbLite" />
     </js-module>
     <platform name="android">
         <config-file parent="/*" target="res/xml/config.xml">
-            <feature name="CouchbaseLitePlugin">
-                <param name="android-package" value="cordova.plugin.couchbaselite.CouchbaseLitePlugin" />
+            <feature name="CBLite">
+                <param name="android-package" value="com.couchbase.cblite.CBLite" />
             </feature>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
 
-        <source-file src="src/android/CouchbaseLitePlugin.java" target-dir="src/cordova/plugin/couchbaselite" />
-        <source-file src="src/android/utils/DatabaseManager.java" target-dir="src/cordova/plugin/couchbaselite/utils" />
-	<source-file src="src/android/objects/DatabaseArgument.java" target-dir="src/cordova/plugin/couchbaselite/objects" />
-	<source-file src="src/android/objects/DatabaseResource.java" target-dir="src/cordova/plugin/couchbaselite/objects" />
-	<source-file src="src/android/objects/DocumentArgument.java" target-dir="src/cordova/plugin/couchbaselite/objects" />
-	<source-file src="src/android/enums/ResultCode.java" target-dir="src/cordova/plugin/couchbaselite/enums" />
-
-        <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
-        <resource-file src="libs/couchbase-lite-android.aar" target="libs/couchbase-lite-android.aar" />
+      <source-file src="src/android/CBLite.java" target-dir="src/com/couchbase/cblite" />
+        <source-file src="src/android/utils/DatabaseManager.java" target-dir="src/com/couchbase/cblite/utils" />
+		<source-file src="src/android/objects/DatabaseArgument.java" target-dir="src/com/couchbase/cblite/objects" />
+		<source-file src="src/android/objects/DatabaseResource.java" target-dir="src/com/couchbase/cblite/objects" />
+		<source-file src="src/android/objects/DocumentArgument.java" target-dir="src/com/couchbase/cblite/objects" />
+		<source-file src="src/android/enums/ResultCode.java" target-dir="src/com/couchbase/cblite/enums" />
+       
     </platform>
 
 </plugin>

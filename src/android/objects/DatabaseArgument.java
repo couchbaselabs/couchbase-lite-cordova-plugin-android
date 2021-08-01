@@ -1,4 +1,4 @@
-package cordova.plugin.couchbaselite.objects;
+package com.couchbase.cblite.objects;
 
 public class DatabaseArgument {
 
