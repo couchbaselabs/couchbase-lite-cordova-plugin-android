@@ -32,11 +32,11 @@ This is WIP
 
 ## Plugin integration 
 
-This plugin can be integrated in cordova or ionic projects. These steps are for integrating with an Ionic Project.
+This plugin can be integrated in cordova or ionic projects. These steps are for integrating with a blank Angular Ionic Project.
 
-- Create a blank ionic project without capacitor integration. Choose angular as language. 
+- Create a blank ionic project without capacitor integration. Use Angular as language. 
 (Starter's Guide: https://ionicframework.com/docs/developing/starting )
-- Install platform android using:
+- Install android platform into your ionic project using:
 ``` 
 ionic cordova platform add android
 ```
