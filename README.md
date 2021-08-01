@@ -85,6 +85,7 @@ const config = {
     directory: "{{DIRECTORY}}"
 };
 let dbName = '{{DATABASE_NAME}}'
+
 cbLite.createDatabase(dbName, config, function(rs) { }, function(error) { });
 ```
 
@@ -96,6 +97,7 @@ const config = {
     directory: "{{DIRECTORY}}"
 };
 let dbName = "{{DATABASE_NAME}}";
+
 cbLite.closeDatabase(dbName, config, function(rs) { }, function(error) { });
 
 ```
@@ -116,7 +118,6 @@ const newConfig = {
     directory: "{{DIRECTORY}}"
 };
 
-
 cbLite.closeDatabase(dbName, config, newDbName, newConfig, function(rs) { }, function(error) { });
 
 ```
@@ -129,6 +130,7 @@ const config = {
     directory: "{{DIRECTORY}}"
 };
 let dbName = "{{DATABASE_NAME}}";
+
 cbLite.deleteDatabase(dbName, config, function(rs) { }, function(error) { });
 
 ```
@@ -179,9 +181,7 @@ let key = "{{BLOB_KEY}}";
 let contentType = "{{CONTENT_TYPE}}";
 let blobData = "{{BLOB_DATA}}"; <== Base64
 
-
 cbLite.mutableDocumentSetBlob(id, dbName, key, contentType, blobData, function(rs) { }, function(err) {  });
-
 ```
 
 ## Set Blob using Embedded Resource
@@ -193,25 +193,24 @@ let contentType = "{{CONTENT_TYPE}}";
 let drawableResource = "{{RESOURCE_NAME}}"; <== asset placed under drawable directory (native)
 
 cbLite.mutableDocumentSetBlob(id, dbName, contentType, key, drawableResource, function(rs) { }, function(err) { });
-
 ```
 
 ## Set Blob using Native File URL
 ```
-let id = "{{DOCUMENT_ID}}"
+let id = "{{DOCUMENT_ID}}";
 let dbName = "{{DATABASE_NAME}}";
 let key = "{{BLOB_KEY}}";
 let contentType = "{{CONTENT_TYPE}}";
 let imageURL = "{{NATIVE_FILE_URL}}";
 
 cbLite.mutableDocumentSetBlob(id, dbName, contentType, key, imageURL, function(rs) { }, function(err) { });
-
 ```
 
 ## Get Blob
 ```
 let dbName = "{{DATABASE_NAME}}";
-let blob = {{Blob from Document}},
+let blob = {{Blob from Document}};
+
 cbLite.getBlob(dbName, blob, function(blob) { }, function(error) { });
 
 ```
@@ -220,6 +219,7 @@ cbLite.getBlob(dbName, blob, function(blob) { }, function(error) { });
 
 ```
 let dbName = "{{DATABASE_NAME}}";
+
 cbLite.dbAddListener(dbName, function(blob) { }, function(error) { });
 
 ```
@@ -228,6 +228,7 @@ cbLite.dbAddListener(dbName, function(blob) { }, function(error) { });
 
 ```
 let dbName = "{{DATABASE_NAME}}";
+
 cbLite.dbRemoveListener(dbName, function(blob) { }, function(error) { });
 
 ```
