@@ -17,6 +17,8 @@
 		<source-file src="src/android/objects/DatabaseArgument.java" target-dir="src/com/couchbase/cblite/objects" />
 		<source-file src="src/android/objects/DatabaseResource.java" target-dir="src/com/couchbase/cblite/objects" />
 		<source-file src="src/android/objects/DocumentArgument.java" target-dir="src/com/couchbase/cblite/objects" />
+		<source-file src="src/android/objects/ListenerArgument.java" target-dir="src/com/couchbase/cblite/objects" />
+
 		<source-file src="src/android/enums/ResultCode.java" target-dir="src/com/couchbase/cblite/enums" />
        
     </platform>
