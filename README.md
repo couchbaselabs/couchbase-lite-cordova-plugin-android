@@ -11,149 +11,231 @@ The following list of Couchbase Lite (Android) APIs is exported by the plugin.
 
 This is WIP
 
-| Create Database (with specified Configuration) | Database |
+| API methods | Native Class |
 | :---: | :---: |
-| Create DatabaseConfiguration | DatabaseConfiguration |
-| Close Database | Database |
+| createDatabase (with specified Configuration) | Database |
+| closeDatabase | Database |
 | copyDatabase | Database |
-| AddChangeListener to listen for database changes | Database |
-| RemoveChangeListener | Database |
-| saveDocument (With JSONString) | MutableDocument |
-| saveBlob  | Database |
-| getBlob  | Database |
-| deleteDocument | MutableDocument |
+| dbAddListener | Database |
+| dbRemoveListener | Database |
+| saveDocument (With JSON OBJECT) | MutableDocument |
+| mutableDocumentSetString | MutableDocument |
 | getDocument | MutableDocument |
+| deleteDocument | MutableDocument |
+| mutableDocumentSetBlob  | MutableDocument |
+| documentSetBlobFromEmbeddedResource | MutableDocument |
+| documentSetBlobFromFileUrl | MutableDocument |
+| getBlob  | Database |
+| enableLogging  | Database |
 
-# Build Instructions
-- clone this repository
+
+
+## Plugin integration 
+
+This plugin can be integrated in cordova or ionic projects. These steps are for integrating with an Ionic Project.
+
+- Create an ionic project (Starter guide: https://ionicframework.com/docs/developing/starting )
+- Install platform android using:
+``` 
+ionic cordova platform add android
+```
+- Build your project using command: 
+```
+ionic cordova build android
+```
+- Install this plugin using command: 
+```
+ionic cordova plugin add https://github.com/rajagp/couchbase-lite-cordova-plugin-android.git
+```
+
+## Adding couchbase-lite-android sdk as dependency in your ionic project:
 
 ## To use couchbase-lite-android sdk using an .aar file follow these steps:
-- cd into the cloned repository
-- copy 'build.gradle' file from ./plugin-build-gradle/**aar/build.gradle** and paste it inside ./src/android/
-- rename your .aar file to 'couchbase-lite-android.aar' and place it inside directory ./libs 
+- open android studio and open android project located inside your ionic project under directory: ./platforms/android
+- place your library .aar file inside your android project creating a new directory called 'libs'. 
+```
+e.g.:  ./app/libs/couchbase-lite-android-ee-3.0.0.aar
+```
+- open your 'app' level build.gradle file and add your library file path under dependencies.
+``` 
+e.g.: implementation files('libs/couchbase-lite-android-ee-3.0.0.aar')
+```
+
 
 ## To use couchbase-lite-android sdk from maven follow these steps:
-- cd into the cloned repository
-- copy 'build.gradle' file from ./plugin-build-gradle/**maven/build.gradle** and paste it inside ./src/android/
-- version of the library can be changed by editing the build.gradle file
+- open android studio and open android project located inside your ionic project under directory: ./platforms/android
+- open your 'app' level build.gradle file and add your library file path.
  ```
  dependencies {
     implementation 'com.couchbase.lite:couchbase-lite-android:${version}'
  }
 ```
 
-## Next steps: Install the plugin in your project by using the following command:
-
-```
-- cd into your Ionic project folder
-- ionic cordova plugin install {{PATH_TO_PLUGIN}}
-
-example: ionic cordova plugin install ../couchbase-lite-cordova-plugin-android
-
-```
 
 # Sample Usage Instructions
 
 ## To use the plugin declare it on top of your component: 
 
-```declare var CouchbaseLitePlugin: any;```
+```declare var cbLite: any;```
 
 ## Create Database 
 ```
 const config = {
-    dbName: "{{DATABASE_NAME}}",
-    directory: "{{DIRECTORY_NAME}}"
+    encryptionKey: "{{ENCRYPTION_KEY}}",
+    directory: "{{DIRECTORY}}"
 };
-CouchbaseLitePlugin.createDatabase(config, function(result) { }, function(error) { });
-```
-
-## Save Document
-```
-const params = {
-    dbName: "{{DATABASE_NAME}}",
-    docId: "{{NEW_DOCUMENT_ID}}",
-    document: {
-      "foo" : "bar",
-      "hello" : "world"
-    }
-}
-
-CouchbaseLitePlugin.saveDocument(params, function(result) { }, function(error) { });
-```
-
-## Get Document 
-```
-const params = {
-    dbName: "{{DATABASE_NAME}}",
-    docId: "{{NEW_DOCUMENT_ID}}",
-};
-
-CouchbaseLitePlugin.getDocument(params, function(result) { }, function(error) { });
-```
-
-
-## Set Blob
-
-```
-const config = {
-    dbName: "{{DATABASE_NAME}}",
-    imageData: {{Base64 String}},
-    contentType: {{CONTENT_TYPE}}
-};
-
-CouchbaseLitePlugin.setBlob(config, function(blob) { }, function(error) { });
-
-```
-
-
-## Get Blob
-
-```
-const config = {
-    dbName: "{{DATABASE_NAME}}",
-    blob: {{Blob from Document}},
-};
-
-CouchbaseLitePlugin.getBlob(config, function(blob) { }, function(error) { });
-
-```
-
-## Add Change Listener
-
-```
-const config = {
-    dbName: "{{DATABASE_NAME}}"
-};
-
-CouchbaseLitePlugin.addChangeListener(config, function(blob) { }, function(error) { });
-
-```
-
-## Remove Change Listener
-
-```
-const config = {
-    dbName: "{{DATABASE_NAME}}"
-};
-
-CouchbaseLitePlugin.removeChangeListener(config, function(blob) { }, function(error) { });
-
+let dbName = '{{DATABASE_NAME}}'
+cbLite.createDatabase(dbName, config, function(rs) { }, function(error) { });
 ```
 
 ## Close Database
 
 ```
 const config = {
-    dbName: "{{DATABASE_NAME}}"
+    encryptionKey: "{{ENCRYPTION_KEY}}",
+    directory: "{{DIRECTORY}}"
 };
-
-CouchbaseLitePlugin.closeDatabase(config, function(blob) { }, function(error) { });
+let dbName = "{{DATABASE_NAME}}";
+cbLite.closeDatabase(dbName, config, function(rs) { }, function(error) { });
 
 ```
-# Sample App
 
-[Sample UserProfile Ionic app](https://github.com/rajagp/userprofile-couchbase-mobile-cordova-android/tree/main/standalone) 
+## Copy Database
 
-# Couchbase Lite Version
-This version of Cordova plugin requires Couchbase Lite 3.0.0(Beta).
+```
+let dbName = "{{DATABASE_NAME}}";
+let newDbName = "{{NEW_DATABASE_NAME}}";
+
+const config = {
+    encryptionKey: "{{ENCRYPTION_KEY}}",
+    directory: "{{DIRECTORY}}"
+};
+
+const newConfig = {
+    encryptionKey: "{{ENCRYPTION_KEY}}",
+    directory: "{{DIRECTORY}}"
+};
+
+
+cbLite.closeDatabase(dbName, config, newDbName, newConfig, function(rs) { }, function(error) { });
+
+```
+
+## Delete Database
+
+```
+const config = {
+    encryptionKey: "{{ENCRYPTION_KEY}}",
+    directory: "{{DIRECTORY}}"
+};
+let dbName = "{{DATABASE_NAME}}";
+cbLite.deleteDatabase(dbName, config, function(rs) { }, function(error) { });
+
+```
+
+
+## Save Document
+```
+let id = "{{DOCUMENT_ID}}";
+let document = "{{JSON_OBJECT}}"; e.g { foo : 'bar', adam : 'eve' }
+let dbName = "{{DATABASE_NAME}}";
+
+cbLite.saveDocument(id, document, dbName, function(rs) { }, function(error) { });
+```
+
+## Adding/Updating key value to Document
+```
+let id = "{{DOCUMENT_ID}}";
+
+let dbName = "{{DATABASE_NAME}}";
+let key = "{{KEY}}";
+let value = "{{VALUE}}";
+
+cbLite.mutableDocumentSetString(id, key, value, dbName,  function(rs) { }, function(err) { });
+```
+
+## Get Document 
+```
+let id = "{{DOCUMENT_ID}}"
+let dbName = "{{DATABASE_NAME}}";
+
+cbLite.getDocument(id, dbName, function(result) { }, function(error) { });
+```
+
+## Delete Document 
+```
+let id = "{{DOCUMENT_ID}}"
+let dbName = "{{DATABASE_NAME}}";
+
+cbLite.deleteDocument(id, dbName, function(result) { }, function(error) { });
+```
+
+
+## Set Blob using Base64
+```
+let id = "{{DOCUMENT_ID}}"
+let dbName = "{{DATABASE_NAME}}";
+let key = "{{BLOB_KEY}}";
+let contentType = "{{CONTENT_TYPE}}";
+let blobData = "{{BLOB_DATA}}"; <== Base64
+
+
+cbLite.mutableDocumentSetBlob(id, dbName, key, contentType, blobData, function(rs) { }, function(err) {  });
+
+```
+
+## Set Blob using Embedded Resource
+```
+let id = "{{DOCUMENT_ID}}"
+let dbName = "{{DATABASE_NAME}}";
+let key = "{{BLOB_KEY}}";
+let contentType = "{{CONTENT_TYPE}}";
+let drawableResource = "{{RESOURCE_NAME}}"; <== asset placed under drawable directory (native)
+
+cbLite.mutableDocumentSetBlob(id, dbName, contentType, key, drawableResource, function(rs) { }, function(err) { });
+
+```
+
+## Set Blob using Native File URL
+```
+let id = "{{DOCUMENT_ID}}"
+let dbName = "{{DATABASE_NAME}}";
+let key = "{{BLOB_KEY}}";
+let contentType = "{{CONTENT_TYPE}}";
+let imageURL = "{{NATIVE_FILE_URL}}";
+
+cbLite.mutableDocumentSetBlob(id, dbName, contentType, key, imageURL, function(rs) { }, function(err) { });
+
+```
+
+## Get Blob
+```
+let dbName = "{{DATABASE_NAME}}";
+let blob = {{Blob from Document}},
+cbLite.getBlob(dbName, blob, function(blob) { }, function(error) { });
+
+```
+
+## Add Change Listener
+
+```
+let dbName = "{{DATABASE_NAME}}";
+cbLite.dbAddListener(dbName, function(blob) { }, function(error) { });
+
+```
+
+## Remove Change Listener
+
+```
+let dbName = "{{DATABASE_NAME}}";
+cbLite.dbRemoveListener(dbName, function(blob) { }, function(error) { });
+
+```
+
+## Enable Logging (logs shows on native)
+
+```
+cbLite.enableLogging(function(blob) { }, function(error) { });
+
+```
 
