@@ -92,7 +92,7 @@ const config = {
 };
 let dbName = '{{DATABASE_NAME}}'
 
-cbLite.createDatabase(dbName, config, function(rs) { }, function(error) { });
+CBL.createDatabase(dbName, config, function(rs) { }, function(error) { });
 ```
 
 ## Close Database
@@ -104,7 +104,7 @@ const config = {
 };
 let dbName = "{{DATABASE_NAME}}";
 
-cbLite.closeDatabase(dbName, config, function(rs) { }, function(error) { });
+CBL.closeDatabase(dbName, config, function(rs) { }, function(error) { });
 
 ```
 
@@ -124,7 +124,7 @@ const newConfig = {
     directory: "{{DIRECTORY}}"
 };
 
-cbLite.closeDatabase(dbName, config, newDbName, newConfig, function(rs) { }, function(error) { });
+CBL.closeDatabase(dbName, config, newDbName, newConfig, function(rs) { }, function(error) { });
 
 ```
 
@@ -137,7 +137,7 @@ const config = {
 };
 let dbName = "{{DATABASE_NAME}}";
 
-cbLite.deleteDatabase(dbName, config, function(rs) { }, function(error) { });
+CBL.deleteDatabase(dbName, config, function(rs) { }, function(error) { });
 
 ```
 
@@ -148,7 +148,7 @@ let id = "{{DOCUMENT_ID}}";
 let document = "{{JSON_OBJECT}}"; e.g { foo : 'bar', adam : 'eve' }
 let dbName = "{{DATABASE_NAME}}";
 
-cbLite.saveDocument(id, document, dbName, function(rs) { }, function(error) { });
+CBL.saveDocument(id, document, dbName, function(rs) { }, function(error) { });
 ```
 
 ## Adding/Updating key value to Document
@@ -159,7 +159,7 @@ let dbName = "{{DATABASE_NAME}}";
 let key = "{{KEY}}";
 let value = "{{VALUE}}";
 
-cbLite.mutableDocumentSetString(id, key, value, dbName,  function(rs) { }, function(err) { });
+CBL.mutableDocumentSetString(id, key, value, dbName,  function(rs) { }, function(err) { });
 ```
 
 ## Get Document 
@@ -167,7 +167,7 @@ cbLite.mutableDocumentSetString(id, key, value, dbName,  function(rs) { }, funct
 let id = "{{DOCUMENT_ID}}"
 let dbName = "{{DATABASE_NAME}}";
 
-cbLite.getDocument(id, dbName, function(result) { }, function(error) { });
+CBL.getDocument(id, dbName, function(result) { }, function(error) { });
 ```
 
 ## Delete Document 
@@ -175,7 +175,7 @@ cbLite.getDocument(id, dbName, function(result) { }, function(error) { });
 let id = "{{DOCUMENT_ID}}"
 let dbName = "{{DATABASE_NAME}}";
 
-cbLite.deleteDocument(id, dbName, function(result) { }, function(error) { });
+CBL.deleteDocument(id, dbName, function(result) { }, function(error) { });
 ```
 
 
@@ -187,7 +187,7 @@ let key = "{{BLOB_KEY}}";
 let contentType = "{{CONTENT_TYPE}}";
 let blobData = "{{BLOB_DATA}}"; <== Base64
 
-cbLite.mutableDocumentSetBlob(id, dbName, key, contentType, blobData, function(rs) { }, function(err) {  });
+CBL.mutableDocumentSetBlob(id, dbName, key, contentType, blobData, function(rs) { }, function(err) {  });
 ```
 
 ## Set Blob using Embedded Resource
@@ -198,7 +198,7 @@ let key = "{{BLOB_KEY}}";
 let contentType = "{{CONTENT_TYPE}}";
 let drawableResource = "{{RESOURCE_NAME}}"; <== asset placed under drawable directory (native)
 
-cbLite.mutableDocumentSetBlob(id, dbName, contentType, key, drawableResource, function(rs) { }, function(err) { });
+CBL.mutableDocumentSetBlob(id, dbName, contentType, key, drawableResource, function(rs) { }, function(err) { });
 ```
 
 ## Set Blob using Native File URL
@@ -209,7 +209,7 @@ let key = "{{BLOB_KEY}}";
 let contentType = "{{CONTENT_TYPE}}";
 let imageURL = "{{NATIVE_FILE_URL}}";
 
-cbLite.mutableDocumentSetBlob(id, dbName, contentType, key, imageURL, function(rs) { }, function(err) { });
+CBL.mutableDocumentSetBlob(id, dbName, contentType, key, imageURL, function(rs) { }, function(err) { });
 ```
 
 ## Get Blob
@@ -217,7 +217,7 @@ cbLite.mutableDocumentSetBlob(id, dbName, contentType, key, imageURL, function(r
 let dbName = "{{DATABASE_NAME}}";
 let blob = {{Blob from Document}};
 
-cbLite.getBlob(dbName, blob, function(blob) { }, function(error) { });
+CBL.getBlob(dbName, blob, function(blob) { }, function(error) { });
 
 ```
 
@@ -226,7 +226,7 @@ cbLite.getBlob(dbName, blob, function(blob) { }, function(error) { });
 ```
 let dbName = "{{DATABASE_NAME}}";
 
-cbLite.dbAddListener(dbName, function(blob) { }, function(error) { });
+CBL.dbAddListener(dbName, function(blob) { }, function(error) { });
 
 ```
 
@@ -235,14 +235,14 @@ cbLite.dbAddListener(dbName, function(blob) { }, function(error) { });
 ```
 let dbName = "{{DATABASE_NAME}}";
 
-cbLite.dbRemoveListener(dbName, function(blob) { }, function(error) { });
+CBL.dbRemoveListener(dbName, function(blob) { }, function(error) { });
 
 ```
 
 ## Enable Logging (logs shows on native)
 
 ```
-cbLite.enableLogging(function(blob) { }, function(error) { });
+CBL.enableLogging(function(blob) { }, function(error) { });
 
 ```
 
