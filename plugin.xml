@@ -2,7 +2,7 @@
 <plugin id="cordova.plugin.couchbaselite" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>CouchbaseLitePlugin</name>
     <js-module name="cblite" src="www/cblite.js">
-        <clobbers target="cbLite" />
+        <clobbers target="CBL" />
     </js-module>
     <platform name="android">
         <config-file parent="/*" target="res/xml/config.xml">
