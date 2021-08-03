@@ -257,7 +257,7 @@ The plugin exposes 'CBL' object globaly and the methods exposed by the plugin ca
 chrome://inspect/#devices
 ```
 5. Open 'Console' Tab
-6. Now you can use 'CBL' object to call the plugin's exposed methods.
+6. Now you can use 'CBL' object to call the plugin's exposed methods. example: 
 ```
-example: CBL.createDatabase('Database', { 'encryptionKey': '', 'directory' : 'database'}, function(rs) { console.log(rs)}, function(err) { console.log(err) });
+CBL.createDatabase('Database', { 'encryptionKey': '', 'directory' : 'database'}, function(rs) { console.log(rs)}, function(err) { console.log(err) });
 ```
