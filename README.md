@@ -246,7 +246,7 @@ cbLite.enableLogging(function(blob) { }, function(error) { });
 
 ```
 
-## Steps to Test the plugin if you are adding/modifying
+## Steps to test the plugin when modifications are made on your own
 
 The plugin exposes 'CBL' object globaly and the methods exposed by the plugin can be called. To test whether its exposed methods work properly we can perform the following:
 1. Create a test ionic project and install the plugin
