@@ -312,7 +312,7 @@ chrome://inspect/#devices
 CBL.createDatabase('Database', { 'encryptionKey': '', 'directory' : 'database'}, function(rs) { console.log(rs)}, function(err) { console.log(err) });
 ```
 
-![](https://blog.couchbase.com/wp-content/uploads/2021/08/chrome-inspect-phase1-e1628022473262.gif)
+![](https://blog.couchbase.com/wp-content/uploads/2021/08/chrome-inspect.gif)
 
 ## Updates to Plugin
 
