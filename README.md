@@ -246,3 +246,15 @@ cbLite.enableLogging(function(blob) { }, function(error) { });
 
 ```
 
+## Steps to Test the plugin if you are adding/modifying
+
+The plugin exposes 'CBL' object globaly and the methods exposed by the plugin can be called. To test whether its exposed methods work properly we can perform the following:
+1. Create a test ionic project and install the plugin
+2. Run your project in your emulator / device. ( make sure USB debugging is enabled )
+3. Open Google Chrome
+4. Enter chrome://inspect/#devices on Chrome's address bar
+5. Open 'Console' Tab
+6. Now you can use 'CBL' object to call the plugin's exposed methods.
+```
+example: CBL.createDatabase('Database', { 'encryptionKey': '', 'directory' : 'database'}, function(rs) { console.log(rs)}, function(err) { console.log(err) });
+```
