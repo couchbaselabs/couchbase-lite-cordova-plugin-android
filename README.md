@@ -317,5 +317,6 @@ CBL.createDatabase('Database', { 'encryptionKey': '', 'directory' : 'database'},
 ## Updates to Plugin
 
 If you update the plugin such as adding a new API, don't forget to  remove the plugin and re-add it to the app
-
-
+```
+ionic cordova plugin rm cordova.plugin.couchbaselite
+```
