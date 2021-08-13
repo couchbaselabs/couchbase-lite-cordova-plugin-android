@@ -5,6 +5,7 @@ var cblite = function () { }
 
 cblite.prototype.createDatabase = function (dbName, config, successCallback, errorCallback) {
 	let defaultConfig = this.getConfig(dbName, config);
+	this.dbName = dbName;
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'createDatabase', [defaultConfig]);
 };
 
@@ -26,6 +27,27 @@ cblite.prototype.deleteDatabase = function(dbName, config,  successCallback, err
 	let defaultConfig = this.getConfig(dbName, config);
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'deleteDatabase', [defaultConfig]);
 };
+
+cblite.prototype.dbAddListener = function(databaseName, callbackName, successCallback, errorCallback) {
+	if (databaseName == null || callbackName == null) {
+		throw ("error: database name and callbackName can't be null");
+	}
+	let args = {
+		dbName: databaseName,	
+		jsCallback: callbackName
+	};
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'addChangeListener', [args]);
+}
+
+cblite.prototype.dbRemoveListener = function(databaseName, successCallback, errorCallback) {
+	if (databaseName == null) {
+		throw ("error: database name can't be null");
+	}
+	let args = {
+		dbName: databaseName	
+	};
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'removeChangeListener', [args]);
+}
 
 //todo add the add/remove change listeners later
 cblite.prototype.getDocument = function (id, dbName, successCallback, errorCallback) {
@@ -176,30 +198,59 @@ cblite.prototype.enableLogging = function (domain, logLevel, successCallback, er
 		domain: domain,
 		logLevel: logLevel
 	};
-
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'enableLogging', [args])
 };
 
-cblite.prototype.dbAddListener = function(databaseName, callbackName, successCallback, errorCallback) {
-	if (databaseName == null || callbackName == null) {
-		throw ("error: database name and callbackName can't be null");
+cblite.prototype.query = function(dbName, query, successCallback, errorCallback) { 
+	if (dbName == null || dbName == "" || query == null || query == "") {
+		throw ('error: dbName or query is not set, must send dbName and a N1QL query to process');
 	}
 	let args = {
-		dbName: databaseName,	
-		jsCallback: callbackName
+		dbName: dbName,
+		query: query
 	};
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'addChangeListener', [args]);
-}
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'queryDb', [args])
+};
 
-cblite.prototype.dbRemoveListener = function(databaseName, successCallback, errorCallback) {
-	if (databaseName == null) {
-		throw ("error: database name can't be null");
+cblite.prototype.createValueIndex = function(dbName, indexName, indexes, successCallback, errorCallback) {
+	if (dbName == null || dbName == "" || indexName == null || indexName == "" || indexes == null){
+		throw ('error: dbName, indexName and index must have value');
 	}
 	let args = {
-		dbName: databaseName	
+		dbName: dbName,
+		indexName: indexName, 
+		indexes: indexes
 	};
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'removeChangeListener', [args]);
-}
+
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'createValueIndex', [args]);
+};
+
+cblite.prototype.createFTSIndex = function(dbName, indexName, ignoreAccents, language, indexes, successCallback, errorCallback) {
+	if (dbName == null || dbName == "" || indexName == null || indexName == "" || indexes == null){
+		throw ('error: dbName, indexName and index must have value');
+	}
+
+	let args = {
+		dbName: dbName,
+		indexName: indexName, 
+		indexes: indexes,
+		language: language,
+		ignoreAccents: ignoreAccents
+	};
+
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'createFTSIndex', [args]);
+};
+
+cblite.prototype.deleteIndex = function(dbName, indexName, successCallback, errorCallback) {
+	if (indexName == null || indexName == ""){
+		throw ('error: dbName, indexName must have value');
+	}
+	let args = {
+		dbName: dbName,
+		indexName: indexName
+	};
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'deleteIndex', [args])
+};
 
 cblite.prototype.getDocumentInfo = function (id, dbName) {
 	if (id == null) {
@@ -254,6 +305,8 @@ cblite.prototype.getConfig = function (dbName, config) {
 		}
 	}
 	return defaultConfig;
+
+	cblite.dbName = "";
 };
 
 var cblitePlugin = new cblite();
