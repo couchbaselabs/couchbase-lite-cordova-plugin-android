@@ -13,13 +13,17 @@
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
 
       <source-file src="src/android/CBLite.java" target-dir="src/com/couchbase/cblite" />
-        <source-file src="src/android/utils/DatabaseManager.java" target-dir="src/com/couchbase/cblite/utils" />
-		<source-file src="src/android/objects/DatabaseArgument.java" target-dir="src/com/couchbase/cblite/objects" />
-		<source-file src="src/android/objects/DatabaseResource.java" target-dir="src/com/couchbase/cblite/objects" />
-		<source-file src="src/android/objects/DocumentArgument.java" target-dir="src/com/couchbase/cblite/objects" />
-		<source-file src="src/android/objects/ListenerArgument.java" target-dir="src/com/couchbase/cblite/objects" />
+      <source-file src="src/android/utils/DatabaseManager.java" target-dir="src/com/couchbase/cblite/utils" />
+      <source-file src="src/android/objects/DatabaseArgument.java" target-dir="src/com/couchbase/cblite/objects" />
+     <source-file src="src/android/objects/DatabaseResource.java" target-dir="src/com/couchbase/cblite/objects" />
+     <source-file src="src/android/objects/DocumentArgument.java" target-dir="src/com/couchbase/cblite/objects" />
+     <source-file src="src/android/objects/ListenerArgument.java" target-dir="src/com/couchbase/cblite/objects" />
+	 <source-file src="src/android/objects/QueryArgument.java" target-dir="src/com/couchbase/cblite/objects" />
+	 <source-file src="src/android/objects/FTSIndexArgument.java" target-dir="src/com/couchbase/cblite/objects" />
+	 <source-file src="src/android/objects/ValueIndexArgument.java" target-dir="src/com/couchbase/cblite/objects" />
+	 <source-file src="src/android/objects/DeleteIndexArgument.java" target-dir="src/com/couchbase/cblite/objects" />
 
-		<source-file src="src/android/enums/ResultCode.java" target-dir="src/com/couchbase/cblite/enums" />
+     <source-file src="src/android/enums/ResultCode.java" target-dir="src/com/couchbase/cblite/enums" />
        
     </platform>
 
