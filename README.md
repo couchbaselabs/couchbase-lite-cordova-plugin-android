@@ -33,6 +33,12 @@ This is WIP
 | enableLogging  | Database |
 
 
+| createValueIndex  | Database  |
+| createFTSIndex  | Database |
+| deleteIndex  | Database |
+| query  | Query |
+
+
 
 ## Getting Started
 
