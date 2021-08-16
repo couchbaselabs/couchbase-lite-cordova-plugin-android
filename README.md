@@ -31,8 +31,6 @@ This is WIP
 | documentSetBlobFromFileUrl | MutableDocument |
 | getBlob  | Database |
 | enableLogging  | Database |
-
-
 | createValueIndex  | Database  |
 | createFTSIndex  | Database |
 | deleteIndex  | Database |
@@ -297,6 +295,47 @@ Logs will show up on native console output
 CBL.enableLogging(function(blob) { }, function(error) { });
 
 ```
+
+**Create Value Index**
+
+```
+let dbName = "{{DATABASE_NAME}}";
+let indexName = "myIndex";
+let indexes = ['index1', 'index2'];
+
+CBL.createValueIndex(dbName, indexName, indexes, function(rs) {}, function(err) { });
+
+```
+**Create FTS Index**
+
+Logs will show up on native console output
+
+```
+let dbName = "{{DATABASE_NAME}}";
+let indexName = "myIndex";
+let indexes = ['index1', 'index2'];
+let ignoreAccents = false; // unavailable for android
+let language = ""; // unavailable for android
+
+CBL.createValueIndex(dbName, indexName, ignoreAccents, language, indexes, function(rs) { }, function(error) { });
+
+```
+**Delete Index**
+```
+let dbName = "{{DATABASE_NAME}}";
+let indexName = "myIndex";
+CBL.deleteIndex(dbName, indexName, function(rs) { }, function(error) { });
+
+```
+**Execute Query**
+
+```
+let dbName = "{{DATABASE_NAME}}";
+let query = "{{QUERY_STRING}}";
+CBL.query(dbName, query, function(rs) { }, function(error) { });
+
+```
+
 
 ## Quick Debug
 
