@@ -300,7 +300,7 @@ CBL.enableLogging(function(blob) { }, function(error) { });
 
 ```
 let dbName = "{{DATABASE_NAME}}";
-let indexName = "myIndex";
+let indexName = "{{INDEX_NAME}}";
 let indexes = ['index1', 'index2'];
 
 CBL.createValueIndex(dbName, indexName, indexes, function(rs) {}, function(err) { });
@@ -312,7 +312,7 @@ Logs will show up on native console output
 
 ```
 let dbName = "{{DATABASE_NAME}}";
-let indexName = "myIndex";
+let indexName = "{{INDEX_NAME}}";
 let indexes = ['index1', 'index2'];
 let ignoreAccents = false; // unavailable for android
 let language = ""; // unavailable for android
@@ -323,7 +323,7 @@ CBL.createValueIndex(dbName, indexName, ignoreAccents, language, indexes, functi
 **Delete Index**
 ```
 let dbName = "{{DATABASE_NAME}}";
-let indexName = "myIndex";
+let indexName = "{{INDEX_NAME}}";
 CBL.deleteIndex(dbName, indexName, function(rs) { }, function(error) { });
 
 ```
