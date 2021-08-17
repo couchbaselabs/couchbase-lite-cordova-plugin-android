@@ -6,15 +6,15 @@ public class ValueIndexArgument {
 
     private String databaseName;
     private String indexName;
-    private List<String> indexes;
+    private List<String> indexExpressions;
 
 
-    public List<String> getIndexes() {
-        return indexes;
+    public List<String> getIndexExpressions() {
+        return indexExpressions;
     }
 
-    public void setIndexes(List<String> indexes) {
-        this.indexes = indexes;
+    public void setIndexExpressions(List<String> indexes) {
+        this.indexExpressions = indexes;
     }
 
 

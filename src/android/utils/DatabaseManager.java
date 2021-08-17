@@ -102,6 +102,10 @@ public class DatabaseManager {
       DatabaseConfiguration dbConfig = getDatabaseConfig(dbArgument);
       String dbName = dbArgument.getName();
 
+      if (databases.containsKey(dbName)) {
+        return ResultCode.DATABASE_ALREADY_EXISTS;
+      }
+
       if (dbName != null && dbConfig != null) {
 
         Database database = new Database(dbName, dbConfig);
@@ -145,9 +149,10 @@ public class DatabaseManager {
   public ResultCode copyDatabase(DatabaseArgument currentDbArgs, DatabaseArgument newDbArgs) {
     try {
 
-      if (!databases.containsKey(currentDbArgs.getName())) {
-        return ResultCode.DATABASE_DOES_NOT_EXIST;
-      }
+      ResultCode createResult = this.createDatabase(currentDbArgs);
+
+      if (createResult == ResultCode.ERROR)  { return createResult; };
+
       if (new File(newDbArgs.getDirectory() + "/" + newDbArgs.getName() + ".cblite2").isDirectory()) {
         return ResultCode.DATABASE_ALREADY_EXISTS;
       }
@@ -267,6 +272,7 @@ public class DatabaseManager {
       Document resultDoc = database.getDocument(docId);
 
       return resultDoc.toJSON();
+
 
     } catch (CouchbaseLiteException e) {
       e.printStackTrace();
@@ -640,7 +646,7 @@ public class DatabaseManager {
     try {
       String database = argument.getDatabaseName();
       String indexName = argument.getIndexName();
-      List<String> indexes = argument.getIndexes();
+      List<String> indexExpressionList = argument.getIndexExpressions();
 
       if (!databases.containsKey(database)) {
         return ResultCode.DATABASE_DOES_NOT_EXIST;
@@ -649,14 +655,9 @@ public class DatabaseManager {
       DatabaseResource dbResource = databases.get(database);
       Database db = dbResource.getDatabase();
 
-
-      ValueIndexItem[] valueIndexItems = new ValueIndexItem[indexes.size()];
-
-      for (int i = 0; i < indexes.size(); i++) {
-        valueIndexItems[i] = ValueIndexItem.expression(Expression.property(indexes.get(i)));
-      }
-
-      db.createIndex(indexName, IndexBuilder.valueIndex(valueIndexItems));
+      String indexExpression = String.join(",", indexExpressionList);
+      ValueIndexConfiguration indexConfig = new ValueIndexConfiguration(indexExpression);
+      db.createIndex(indexName, indexConfig);
 
       return ResultCode.SUCCESS;
 
@@ -671,7 +672,10 @@ public class DatabaseManager {
     try {
       String database = argument.getDatabaseName();
       String indexName = argument.getIndexName();
-      List<String> indexes = argument.getIndexes();
+      String language = argument.getLanguage();
+      boolean ignoreAccents = argument.isIgnoreAccents();
+
+      List<String> indexExpressionList = argument.getIndexExpressions();
 
       if (!databases.containsKey(database)) {
         return ResultCode.DATABASE_DOES_NOT_EXIST;
@@ -680,13 +684,13 @@ public class DatabaseManager {
       DatabaseResource dbResource = databases.get(database);
       Database db = dbResource.getDatabase();
 
-      FullTextIndexItem[] fullTextIndexItems = new FullTextIndexItem[indexes.size()];
+      String indexExpressions = String.join(",", indexExpressionList);
 
-      for (int i = 0; i < indexes.size(); i++) {
-        fullTextIndexItems[i] = FullTextIndexItem.property(indexes.get(i));
-      }
+      FullTextIndexConfiguration indexConfig = new FullTextIndexConfiguration(indexExpressions);
+      indexConfig.ignoreAccents(ignoreAccents);
+      indexConfig.setLanguage(language);
 
-      db.createIndex(indexName, IndexBuilder.fullTextIndex(fullTextIndexItems));
+      db.createIndex(indexName, indexConfig);
 
       return ResultCode.SUCCESS;
 

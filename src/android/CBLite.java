@@ -117,7 +117,13 @@ public class CBLite extends CordovaPlugin {
         return true;
 
       case ACTION_QUERY_DATABASE:
-        queryDb(args, callbackContext);
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            queryDb(args, callbackContext);
+          }
+        });
+
         return true;
 
       case ACTION_CREATE_VALUE_INDEX:
@@ -273,7 +279,7 @@ public class CBLite extends CordovaPlugin {
 
       PluginResult pluginResult;
 
-      if (result == ResultCode.SUCCESS || result == ResultCode.EXIST) {
+      if (result == ResultCode.SUCCESS || result == ResultCode.DATABASE_ALREADY_EXISTS) {
         pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
       } else {
         pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: couldn't create or open database");
@@ -862,9 +868,9 @@ public class CBLite extends CordovaPlugin {
     try {
       String name = dictionary.has("dbName") ? dictionary.getString("dbName").toLowerCase() : null;
       String indexName = dictionary.has("indexName") ? dictionary.getString("indexName") : null;
-      JSONArray indexValArr = dictionary.has("indexes") ? dictionary.getJSONArray("indexes") : null;
+      JSONArray indexExprValArr = dictionary.has("indexes") ? dictionary.getJSONArray("indexes") : null;
 
-      if (name == null || indexName == null || indexValArr == null || indexValArr.length() <= 0) {
+      if (name == null || indexName == null || indexExprValArr == null || indexExprValArr.length() <= 0) {
 
         PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: missing arguments.");
         pluginResult.setKeepCallback(false);
@@ -876,15 +882,13 @@ public class CBLite extends CordovaPlugin {
       argument.setDatabaseName(name);
       argument.setIndexName(indexName);
 
-      if (indexValArr.length() > 0) {
 
-        List<String> indexes = new ArrayList<>();
-        for (int i = 0; i < indexValArr.length(); i++) {
-          indexes.add(indexValArr.getString(i));
-        }
-
-        argument.setIndexes(indexes);
+      List<String> indexes = new ArrayList<>();
+      for (int i = 0; i < indexExprValArr.length(); i++) {
+        indexes.add(indexExprValArr.getString(i));
       }
+      argument.setIndexExpressions(indexes);
+
 
       return argument;
 
@@ -939,12 +943,12 @@ public class CBLite extends CordovaPlugin {
     try {
       String name = dictionary.has("dbName") ? dictionary.getString("dbName").toLowerCase() : null;
       String indexName = dictionary.has("indexName") ? dictionary.getString("indexName") : null;
-      JSONArray indexValArr = dictionary.has("indexes") ? dictionary.getJSONArray("indexes") : null;
+      JSONArray indexExprValArr = dictionary.has("indexes") ? dictionary.getJSONArray("indexes") : null;
       String language = dictionary.has("language") ? dictionary.getString("language") : null;
       String ignoreAccents = dictionary.has("ignoreAccents") ? dictionary.getString("ignoreAccents") : null;
 
 
-      if (name == null || indexName == null || indexValArr == null || indexValArr.length() <= 0) {
+      if (name == null || indexName == null || indexExprValArr == null || indexExprValArr.length() <= 0) {
 
         PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: missing arguments.");
         pluginResult.setKeepCallback(false);
@@ -958,15 +962,13 @@ public class CBLite extends CordovaPlugin {
       argument.setIgnoreAccents(ignoreAccents != null && ignoreAccents.toLowerCase().equals("true"));
       argument.setLanguage(language);
 
-      if (indexValArr != null && indexValArr.length() > 0) {
-
-        List<String> indexes = new ArrayList<>();
-        for (int i = 0; i < indexValArr.length(); i++) {
-          indexes.add(indexValArr.getString(i));
-        }
-
-        argument.setIndexes(indexes);
+      List<String> indexes = new ArrayList<>();
+      for (int i = 0; i < indexExprValArr.length(); i++) {
+        indexes.add(indexExprValArr.getString(i));
       }
+
+      argument.setIndexExpressions(indexes);
+
 
       return argument;
 
