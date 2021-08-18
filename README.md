@@ -354,7 +354,7 @@ chrome://inspect/#devices
 5. Now you can use 'CBL' object to call the plugin's exposed methods. Here is an example
 
 ```
-CBL.createDatabase('Database', { 'encryptionKey': '', 'directory' : 'database'}, function(rs) { console.log(rs)}, function(err) { console.log(err) });
+CBL.createOrOpenDatabase('Database', { 'encryptionKey': '', 'directory' : 'database'}, function(rs) { console.log(rs)}, function(err) { console.log(err) });
 ```
 
 ![](https://blog.couchbase.com/wp-content/uploads/2021/08/chrome-inspect.gif)
