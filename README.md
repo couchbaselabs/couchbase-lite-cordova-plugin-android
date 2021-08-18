@@ -17,7 +17,7 @@ This is WIP
 
 | API methods | Native Class |
 | :---: | :---: |
-| createDatabase (with specified Configuration) | Database |
+| createOrOpenDatabase (with specified Configuration) | Database |
 | closeDatabase | Database |
 | copyDatabase | Database |
 | dbAddListener | Database |
@@ -132,7 +132,7 @@ declare var CBL: any;
 ...
 ```
 
-**Create Database**
+**Create Or Open Database**
 ```
 const config = {
     encryptionKey: "{{ENCRYPTION_KEY}}",
@@ -140,7 +140,7 @@ const config = {
 };
 let dbName = '{{DATABASE_NAME}}'
 
-CBL.createDatabase(dbName, config, function(rs) { }, function(error) { });
+CBL.createOrOpenDatabase(dbName, config, function(rs) { }, function(error) { });
 ```
 
 **Close Database**
