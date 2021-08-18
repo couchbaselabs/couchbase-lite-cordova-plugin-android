@@ -206,6 +206,7 @@ public class DatabaseManager {
 
         DatabaseResource resource = databases.get(dbName);
         resource.getDatabase().close();
+        databases.remove(dbName);
         return ResultCode.SUCCESS;
       }
 
