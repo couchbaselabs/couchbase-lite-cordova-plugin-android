@@ -96,7 +96,7 @@ public class DatabaseManager {
     DatabaseManager.database = database;
   }
 
-  public ResultCode createDatabase(DatabaseArgument dbArgument) {
+  public ResultCode createOrOpenDatabase(DatabaseArgument dbArgument) {
     try {
 
       DatabaseConfiguration dbConfig = getDatabaseConfig(dbArgument);
@@ -149,7 +149,7 @@ public class DatabaseManager {
   public ResultCode copyDatabase(DatabaseArgument currentDbArgs, DatabaseArgument newDbArgs) {
     try {
 
-      ResultCode createResult = this.createDatabase(currentDbArgs);
+      ResultCode createResult = this.createOrOpenDatabase(currentDbArgs);
 
       if (createResult == ResultCode.ERROR)  { return createResult; };
 

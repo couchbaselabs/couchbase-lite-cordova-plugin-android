@@ -31,6 +31,10 @@ This is WIP
 | documentSetBlobFromFileUrl | MutableDocument |
 | getBlob  | Database |
 | enableLogging  | Database |
+| createValueIndex  | Database  |
+| createFTSIndex  | Database |
+| deleteIndex  | Database |
+| query  | Query |
 
 
 
@@ -292,6 +296,47 @@ CBL.enableLogging(function(blob) { }, function(error) { });
 
 ```
 
+**Create Value Index**
+
+```
+let dbName = "{{DATABASE_NAME}}";
+let indexName = "{{INDEX_NAME}}";
+let indexes = [{{INDEX_ARRAY}}];
+
+CBL.createValueIndex(dbName, indexName, indexes, function(rs) {}, function(err) { });
+
+```
+**Create FTS Index**
+
+Logs will show up on native console output
+
+```
+let dbName = "{{DATABASE_NAME}}";
+let indexName = "{{INDEX_NAME}}";
+let indexes = [{{INDEX_ARRAY}}];
+let ignoreAccents = false; // unavailable for android
+let language = ""; // unavailable for android
+
+CBL.createValueIndex(dbName, indexName, ignoreAccents, language, indexes, function(rs) { }, function(error) { });
+
+```
+**Delete Index**
+```
+let dbName = "{{DATABASE_NAME}}";
+let indexName = "{{INDEX_NAME}}";
+CBL.deleteIndex(dbName, indexName, function(rs) { }, function(error) { });
+
+```
+**Execute Query**
+
+```
+let dbName = "{{DATABASE_NAME}}";
+let query = "{{QUERY_STRING}}";
+CBL.query(dbName, query, function(rs) { }, function(error) { });
+
+```
+
+
 ## Quick Debug
 
 You can also use [chrome inspect](https://developer.chrome.com/docs/devtools/) to attach to app running on the Android device or emulator and to direct invoke the CBL APIs. This is very convenient for quick testing to check to see if your plugin API is working as expected.
@@ -312,10 +357,11 @@ chrome://inspect/#devices
 CBL.createDatabase('Database', { 'encryptionKey': '', 'directory' : 'database'}, function(rs) { console.log(rs)}, function(err) { console.log(err) });
 ```
 
-![](https://blog.couchbase.com/wp-content/uploads/2021/08/chrome-inspect-phase1-e1628022473262.gif)
+![](https://blog.couchbase.com/wp-content/uploads/2021/08/chrome-inspect.gif)
 
 ## Updates to Plugin
 
 If you update the plugin such as adding a new API, don't forget to  remove the plugin and re-add it to the app
-
-
+```
+ionic cordova plugin rm cordova.plugin.couchbaselite
+```

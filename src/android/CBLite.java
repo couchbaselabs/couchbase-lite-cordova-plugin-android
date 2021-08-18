@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class CBLite extends CordovaPlugin {
 
-  private static final String ACTION_CREATE_DATABASE = "createDatabase";
+  private static final String ACTION_CREATE_OPEN_DATABASE = "createOrOpenDatabase";
   private static final String ACTION_CLOSE_DATABASE = "closeDatabase";
   private static final String ACTION_DELETE_DATABASE = "deleteDatabase";
   private static final String ACTION_COPY_DATABASE = "copyDatabase";
@@ -64,8 +64,8 @@ public class CBLite extends CordovaPlugin {
 
     switch (action) {
 
-      case ACTION_CREATE_DATABASE:
-        this.createDatabase(args, callbackContext);
+      case ACTION_CREATE_OPEN_DATABASE:
+        this.createOrOpenDatabase(args, callbackContext);
         return true;
       case ACTION_CLOSE_DATABASE:
         closeDatabase(args, callbackContext);
@@ -270,12 +270,12 @@ public class CBLite extends CordovaPlugin {
     return null;
   }
 
-  private void createDatabase(JSONArray args, CallbackContext callbackContext) {
+  private void createOrOpenDatabase(JSONArray args, CallbackContext callbackContext) {
 
     try {
       DatabaseArgument dbArguments = this.parseDatabaseArguments(args.getJSONObject(0), callbackContext);
       DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-      ResultCode result = dbMgr.createDatabase(dbArguments);
+      ResultCode result = dbMgr.createOrOpenDatabase(dbArguments);
 
       PluginResult pluginResult;
 
