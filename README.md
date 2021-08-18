@@ -314,8 +314,8 @@ Logs will show up on native console output
 let dbName = "{{DATABASE_NAME}}";
 let indexName = "{{INDEX_NAME}}";
 let indexes = [{{INDEX_ARRAY}}];
-let ignoreAccents = false; // unavailable for android
-let language = ""; // unavailable for android
+let ignoreAccents = {{true OR false}};
+let language = "{{LANGUAGE_VALUE}}"; 
 
 CBL.createValueIndex(dbName, indexName, ignoreAccents, language, indexes, function(rs) { }, function(error) { });
 
