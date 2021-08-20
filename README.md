@@ -18,6 +18,7 @@ This is WIP
 | API methods | Native Class |
 | :---: | :---: |
 | createOrOpenDatabase (with specified Configuration) | Database |
+| checkDatabase | Database |
 | closeDatabase | Database |
 | copyDatabase | Database |
 | dbAddListener | Database |
