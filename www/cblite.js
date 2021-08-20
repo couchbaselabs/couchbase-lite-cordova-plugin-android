@@ -1,9 +1,7 @@
 var exec = require('cordova/exec');
 
 /*
-var Authenticator = require('./Authenticator');
 var ReplicatorConfiguration = require('./ReplicatorConfiguration')
-var ReplicationType = require('./ReplicatorType')
 */
 
 var PLUGIN_NAME = 'CBLite';
@@ -17,10 +15,8 @@ var cblite = function () { }
  * name and database options. If the database does not yet exist, it will be
  * created. 
  * 
- * @param dbName 
- *          {string} name of the database to open or create 
  * @param config 
- *          {databaseConfig} JSON object with directory and encryptionKey
+ *          {DatabaseConfiguration} JSON object with dbName, directory, and encryptionKey
  *  		properties. 
  * @param successCallback 
  *          {callback} javascript function to call if native code is successful 
@@ -28,12 +24,24 @@ var cblite = function () { }
  *          {callback} javascript function to call if error happens in native
  *  		code 
 */
-cblite.prototype.createOrOpenDatabase = function (dbName, config, successCallback, errorCallback) {
-	let defaultConfig = this.getConfig(dbName, config);
-	this.dbName = dbName;
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'createOrOpenDatabase', [defaultConfig]);
+cblite.prototype.createOrOpenDatabase = function (config, successCallback, errorCallback) {
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'createOrOpenDatabase', [config]);
 };
 
+/* checkDatabase - Checks if database exists in the given directory path
+ *
+ * @param config
+ *          {DatabaseConfiguration} JSON object with directory property.
+ * @param successCallback
+ *          {callback} javascript function to call if native code is successful
+ * @param errorCallback
+ *          {callback} javascript function to call if error happens in native
+ *  		code
+*/
+
+cblite.prototype.checkDatabase = function (config, successCallback, errorCallback) {	
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'checkDatabase', [config]);
+};
 /* closeDatabase - Close database synchronously. Before closing the database,
  * the active replicators, listeners and live queries will be stopped. 
  * 
@@ -54,29 +62,22 @@ cblite.prototype.closeDatabase = function (dbName, successCallback, errorCallbac
  * database configuration, the default configuration that is equivalent to
  * setting all properties in the configuration to nil will be used. 
  * 
- * @param currentDbName 
- *          {string} name of the database to copy 
- * @param currentConfig
- *          {databaseConfig} JSON object with current database directory and
- *  		encryptionKey properties. 
- * @param newDbName 
- *          {string} name of the new database that will be created from the
- *  		copy 
+ * @param resourceName 
+ *          {string} name of the pre-built embedded database file in the
+ *  		platform specific format
  * @param newConfig
- *          {databaseConfig} JSON object with new database directory and
- *  		encryptionKey properties.
+ *          {DatabaseConfiguration} JSON object with new database
+ *  		directory and encryptionKey properties.
  * @param successCallback 
  *          {callback} javascript function to call if native code is successful 
  * @param errorCallback 
  *          {callback} javascript function to call if error happens in native 
  * 			code 
 */
-cblite.prototype.copyDatabase = function (currentDbName, currentConfig, newDbName, newConfig, successCallback, errorCallback) {
-	let currentDbConfig = this.getConfig(currentDbName, currentConfig);
-	let newDbConfig = this.getConfig(newDbName, newConfig);
+cblite.prototype.copyDatabase = function (resourceName, newConfig, successCallback, errorCallback) {
 	let defaultConfig = {
-		currentConfig: currentDbConfig,
-		newConfig: newDbConfig
+		resourceName: resourceName,
+		newConfig: newConfig
 	};
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'copyDatabase', [defaultConfig]);
 };
@@ -93,9 +94,8 @@ cblite.prototype.copyDatabase = function (currentDbName, currentConfig, newDbNam
  *          {callback} javascript function to call if error happens in native
  *  		code 
 */
-cblite.prototype.deleteDatabase = function(dbName, config,  successCallback, errorCallback) {
-	let defaultConfig = this.getConfig(dbName, config);
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'deleteDatabase', [defaultConfig]);
+cblite.prototype.deleteDatabase = function(dbName, successCallback, errorCallback) {
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'deleteDatabase', [dbName]);
 };
 
 /* dbAddListener - Adds a database change listener. Changes will be posted on
@@ -625,8 +625,6 @@ cblite.prototype.deleteIndex = function(dbName, indexName, successCallback, erro
  * replicator can also be one-short or continuous. The replicator runs asynchronously, 
  * so observe the status property to be notified of progress.
  *
- * @param databaseName 
- *          {string} name of the database 
  * @param config 
  *          {ReplicatorConfiguration} The configuration 
  * @param successCallback 
@@ -634,15 +632,11 @@ cblite.prototype.deleteIndex = function(dbName, indexName, successCallback, erro
  * @param errorCallback 
  *          {callback} javascript function to call if error happens in native code 
 */
-cblite.prototype.replicatorStart = function(databaseName, config, successCallback, errorCallback) {
-	if (databaseName == null || config == null) {
-		throw ("error: database name or config can't be null");
+cblite.prototype.replicatorStart = function(config, successCallback, errorCallback) {
+	if (config == null) {
+		throw ("error: config can't be null");
 	}
-	let args = {
-		dbName: databaseName,
-		config: config
-	};
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorStart', [args]);
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorStart', [config]);
 };
 
 /* replicatorStop - Stops a running replicator. This method returns immediately; 
@@ -763,33 +757,108 @@ cblite.prototype.getDocumentFullInfo = function (id, document, dbName) {
 	return args;
 };
 
-/* getConfig - helper method to get database info for arguments 
+/* DatabaseConfiguration - helper method to get database info for arguments 
  *
  * @param dbName 
  *          {string} name of the database 
  * @param config 
  *          {object} object with directory and encryptionKey properties 
 */
-cblite.prototype.getConfig = function (dbName, config) {
+cblite.prototype.DatabaseConfiguration = function (dbName, config) {
 
-	let defaultConfig = {
-		dbName: dbName,
-		directory: "",
-		encryptionKey: ""
-	};
+	var obj = new Object();
+	obj.dbName = dbName;
 	//if config is passed in add values
 	if (config != null) {
 		if (config.hasOwnProperty('encryptionKey')) {
-			defaultConfig.encryptionKey = config.encryptionKey;
+			obj.encryptionKey = config.encryptionKey;
+		} else {
+			obj.encryptionKey = ""; 
 		}
 		if (config.hasOwnProperty('directory')) {
-			defaultConfig.directory = config.directory;
+			obj.directory = config.directory;
+		} else {
+			obj.directory = ""; 
 		}
+	} else {
+		obj.directory = "";
+		obj.encryptionKey = "";
 	}
-	return defaultConfig;
+	return obj;
+};
 
-	cblite.dbName = "";
+
+/** 
+ *  Replicator configuration. 
+ * 
+ * @param databaseName
+ *      {string} The local database name to replicate with the 
+ * 		replication target. 
+ * @param targetUrl
+ *      {string} url of the eplication target to replicate with. 
+*/
+cblite.prototype.ReplicatorConfiguration = function (databaseName, targetUrl){
+	var obj = new Object();
+
+    obj.databaseName = databaseName;
+    obj.target = targetUrl;
+
+	obj.heartbeat = 0;
+	obj.replicatorType = null; 
+    obj.continuous = false; 
+    obj.authenticator = null; 
+    obj.acceptOnlySelfSignedServerCertificate = false; 
+    obj.pinnedServerCertificate = ""; 
+    obj.headers = [, ];
+    obj.channels = [];
+    obj.documentIds = []; 
+    obj.allowReplicatingInBackground = false; 
+
+	return obj;
+};
+
+/* The fromBasicAuthentiation is an authenticator that will authenticate using
+ * HTTP Basic auth with the given username and password. This should only be 
+ * used over an SSL/TLS connection, as otherwise it's very easy for anyone
+ * sniffing network traffic to read the password.  
+ * 
+ * @param username
+ *          {string} user to authenticate with - used with BasicAuthentication 
+ * @param password
+ *          {string} password to autheticate with - used with BasicAuthentiation 
+*/
+cblite.prototype.BasicAuthenticator = function(username, password) {
+    var ba = new Object();
+    ba.username = username;
+    ba.password = password;
+    ba.authType = "Basic";
+    return ba;
+};
+
+/* The fromSessionAuthentication is an authenticator that will authenticate
+ * by using the session ID of the session created by a Sync Gateway 
+ *
+ * @param sessionId
+ *          {string} Session ID of the session created by a Sync Gateway 
+ * @param cookieName
+ *          {string} cookie name that the session ID value will be set to when 
+ *          communicating the * Sync Gateaway. 
+*/
+cblite.prototype.SessionAuthenticator = function(cookieName, sessionId){
+	var sa = new Object();
+	sa.cookieName = cookieName;
+	sa.sessionId = sessionId;
+	sa.authType = "Session";
+	return sa;
+};
+
+cblite.prototype.ReplicatorType = { 
+	"PUSH_AND_PULL": "PUSHANDPULL", 
+	"PUSH": "PUSH", 
+	"PULL": "PULL"
 };
 
 var cblitePlugin = new cblite();
+Object.freeze(cblite.ReplicatorType);
+
 module.exports = cblitePlugin;

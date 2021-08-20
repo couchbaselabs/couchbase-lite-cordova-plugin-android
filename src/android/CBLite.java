@@ -2,15 +2,8 @@ package com.couchbase.cblite;
 
 import android.content.Context;
 
-import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.CallbackContext;
-
-import org.apache.cordova.PluginResult;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.couchbase.cblite.enums.ResultCode;
+import com.couchbase.cblite.objects.DatabaseArgument;
 import com.couchbase.cblite.objects.DeleteIndexArgument;
 import com.couchbase.cblite.objects.DocumentArgument;
 import com.couchbase.cblite.objects.FTSIndexArgument;
@@ -18,7 +11,13 @@ import com.couchbase.cblite.objects.ListenerArgument;
 import com.couchbase.cblite.objects.QueryArgument;
 import com.couchbase.cblite.objects.ValueIndexArgument;
 import com.couchbase.cblite.utils.DatabaseManager;
-import com.couchbase.cblite.objects.DatabaseArgument;
+
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.PluginResult;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +34,7 @@ public class CBLite extends CordovaPlugin {
   private static final String ACTION_ADD_CHANGE_LISTENER = "addChangeListener";
   private static final String ACTION_REMOVE_CHANGE_LISTENER = "removeChangeListener";
   private static final String ACTION_DELETE_DOCUMENT = "deleteDocument";
+  private static final String ACTION_CHECK_DATABASE = "checkDatabase";
 
   private static final String ACTION_SAVE_DOCUMENT = "saveDocument";
   private static final String ACTION_MUTABLE_DOCUMENT_SET_STRING = "mutableDocumentSetString";
@@ -137,12 +137,16 @@ public class CBLite extends CordovaPlugin {
       case ACTION_DELETE_INDEX:
         deleteIndex(args, callbackContext);
         return true;
+
+      case ACTION_CHECK_DATABASE:
+        checkDatabase(args, callbackContext);
+        return true;
+
       default:
         return false;
     }
 
   }
-
 
   private DatabaseArgument parseDatabaseArguments(JSONObject dictionary, CallbackContext callbackContext) {
     DatabaseArgument argument = new DatabaseArgument();
@@ -295,6 +299,37 @@ public class CBLite extends CordovaPlugin {
     }
 
   }
+
+
+
+  private void checkDatabase(JSONArray args, CallbackContext callbackContext) {
+
+    try {
+      DatabaseArgument dbArguments = this.parseDatabaseArguments(args.getJSONObject(0), callbackContext);
+      DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
+      ResultCode result = dbMgr.checkDatabase(dbArguments);
+
+      PluginResult pluginResult;
+
+      if (result == ResultCode.DATABASE_ALREADY_EXISTS) {
+        pluginResult = new PluginResult(PluginResult.Status.OK, true);
+      } else if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
+        pluginResult = new PluginResult(PluginResult.Status.OK, false);
+      } else {
+        pluginResult = new PluginResult(PluginResult.Status.ERROR, "error while checking database, make sure you are passing valid parameters.");
+      }
+      pluginResult.setKeepCallback(false);
+      callbackContext.sendPluginResult(pluginResult);
+
+    } catch (JSONException e) {
+      PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
+      pluginResult.setKeepCallback(false);
+      callbackContext.sendPluginResult(pluginResult);
+      e.printStackTrace();
+    }
+
+  }
+
 
   private void closeDatabase(JSONArray args, CallbackContext callbackContext) {
 

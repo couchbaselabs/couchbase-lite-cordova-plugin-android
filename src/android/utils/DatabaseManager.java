@@ -115,6 +115,7 @@ public class DatabaseManager {
       } else if (dbName != null) {
 
         Database database = new Database(dbName);
+
         databases.put(dbName, new DatabaseResource(database));
         return ResultCode.SUCCESS;
 
@@ -123,6 +124,25 @@ public class DatabaseManager {
       e.printStackTrace();
     }
     return ResultCode.ERROR;
+  }
+
+  public ResultCode checkDatabase(DatabaseArgument dbArgument) {
+
+    DatabaseConfiguration dbConfig = getDatabaseConfig(dbArgument);
+    String dbName = dbArgument.getName();
+
+    if (dbName != null && dbConfig != null) {
+      boolean exists = Database.exists(dbName, new File(dbArgument.getDirectory()));
+
+      if (exists) {
+        return ResultCode.DATABASE_ALREADY_EXISTS;
+      } else {
+        return ResultCode.DATABASE_DOES_NOT_EXIST;
+      }
+    }
+
+    return ResultCode.ERROR;
+
   }
 
   public ResultCode deleteDatabase(DatabaseArgument dbArgument) {
