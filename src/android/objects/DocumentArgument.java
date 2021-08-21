@@ -26,53 +26,6 @@ public class DocumentArgument {
     public DocumentArgument() {
     }
 
-   /* public DocumentArgument(String id, String dbName, String blobData) {
-        this.id = id;
-        this.dbName = dbName;
-        this.blobData = blobData;
-    }
-
-    public DocumentArgument(String id, String dbName) {
-        this.id = id;
-        this.dbName = dbName;
-        this.document = null;
-    }
-
-    public DocumentArgument(String id, JSONObject document, String dbName) {
-        this.id = id;
-        this.document = document;
-        this.dbName = dbName;
-    }
-
-    public DocumentArgument(String id, String dbName, String keyValue, String valueValue) {
-        this.id = id;
-        this.dbName = dbName;
-        this.keyValue = keyValue;
-        this.valueValue = valueValue;
-    }
-
-    public DocumentArgument(String id, String dbName, String keyValue, String acResource, Boolean dummy) {
-        this.id = id;
-        this.dbName = dbName;
-        this.keyValue = keyValue;
-        this.acResource = acResource;
-    }
-
-    public DocumentArgument(String id, String dbName, String keyValue, String fileUrl, Boolean dummy, Boolean dummy2) {
-        this.id = id;
-        this.dbName = dbName;
-        this.keyValue = keyValue;
-        this.fileUrl = fileUrl;
-    }
-
-    public DocumentArgument(String id, String dbName, String keyValue, String contentType, String blobData) {
-        this.id = id;
-        this.dbName = dbName;
-        this.keyValue = keyValue;
-        this.contentType = contentType;
-        this.blobData = blobData;
-    }*/
-
     public String getId() {
         return id;
     }

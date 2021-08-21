@@ -39,8 +39,8 @@ cblite.prototype.createOrOpenDatabase = function (config, successCallback, error
  *  		code
 */
 
-cblite.prototype.checkDatabase = function (config, successCallback, errorCallback) {	
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'checkDatabase', [config]);
+cblite.prototype.databaseExists = function (config, successCallback, errorCallback) {	
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'databaseExists', [config]);
 };
 /* closeDatabase - Close database synchronously. Before closing the database,
  * the active replicators, listeners and live queries will be stopped. 

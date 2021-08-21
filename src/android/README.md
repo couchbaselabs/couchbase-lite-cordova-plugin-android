@@ -17,7 +17,7 @@ This is WIP
 
 | API methods | Native Class |
 | :---: | :---: |
-| createDatabase (with specified Configuration) | Database |
+| createOrOpenDatabase (with specified Configuration) | Database |
 | closeDatabase | Database |
 | copyDatabase | Database |
 | dbAddListener | Database |
@@ -132,7 +132,7 @@ declare var CBL: any;
 ...
 ```
 
-**Create Database**
+**Create Or Open Database**
 ```
 const config = {
     encryptionKey: "{{ENCRYPTION_KEY}}",
@@ -140,7 +140,7 @@ const config = {
 };
 let dbName = '{{DATABASE_NAME}}'
 
-CBL.createDatabase(dbName, config, function(rs) { }, function(error) { });
+CBL.createOrOpenDatabase(dbName, config, function(rs) { }, function(error) { });
 ```
 
 **Close Database**
@@ -314,8 +314,8 @@ Logs will show up on native console output
 let dbName = "{{DATABASE_NAME}}";
 let indexName = "{{INDEX_NAME}}";
 let indexes = [{{INDEX_ARRAY}}];
-let ignoreAccents = false; // unavailable for android
-let language = ""; // unavailable for android
+let ignoreAccents = {{true OR false}}; 
+let language = "{{LANGUAGE_VALUE}}"; 
 
 CBL.createValueIndex(dbName, indexName, ignoreAccents, language, indexes, function(rs) { }, function(error) { });
 
@@ -354,7 +354,7 @@ chrome://inspect/#devices
 5. Now you can use 'CBL' object to call the plugin's exposed methods. Here is an example
 
 ```
-CBL.createDatabase('Database', { 'encryptionKey': '', 'directory' : 'database'}, function(rs) { console.log(rs)}, function(err) { console.log(err) });
+CBL.createOrOpenDatabase('Database', { 'encryptionKey': '', 'directory' : 'database'}, function(rs) { console.log(rs)}, function(err) { console.log(err) });
 ```
 
 ![](https://blog.couchbase.com/wp-content/uploads/2021/08/chrome-inspect.gif)
