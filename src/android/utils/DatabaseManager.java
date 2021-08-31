@@ -1,6 +1,5 @@
 package com.couchbase.cblite.utils;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -543,7 +542,6 @@ public class DatabaseManager {
         return ResultCode.ERROR.toString();
     }
 
-   
     public ResultCode addChangeListener(ListenerArgument listenerArgument, CordovaWebView webView) {
 
         String database = listenerArgument.getDatabaseName();
@@ -566,8 +564,8 @@ public class DatabaseManager {
                 ListenerToken listenerToken = db.addChangeListener(new DatabaseChangeListener() {
                     @Override
                     public void changed(DatabaseChange change) {
-
                         if (change != null) {
+                            docChanges.clear();
                             for (String docId : change.getDocumentIDs()) {
                                 Document doc = db.getDocument(docId);
                                 if (doc == null) {
@@ -630,7 +628,6 @@ public class DatabaseManager {
 
         return ResultCode.SUCCESS;
     }
-
 
     public ResultCode query(QueryArgument argument, CallbackContext callbackContext) {
 
