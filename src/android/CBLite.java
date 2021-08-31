@@ -1,5 +1,6 @@
 package com.couchbase.cblite;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.couchbase.cblite.enums.ResultCode;
@@ -14,6 +15,7 @@ import com.couchbase.cblite.utils.DatabaseManager;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -451,12 +453,17 @@ public class CBLite extends CordovaPlugin {
             }
 
             DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-            ResultCode result = dbMgr.addChangeListener(arguments, callbackContext);
+
+
+            CordovaWebView cdv = this.webView;
+            ResultCode result = dbMgr.addChangeListener(arguments, cdv);
 
             if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database does not exist.");
             } else if (result == ResultCode.ERROR) {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: adding change listener.");
+            } else if (result == ResultCode.CHANGE_LISTENER_ALREADY_EXISTS){
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error:  listener token already exists for this database, remove first before trying to add a new listener.");
             } else {
                 pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
             }
@@ -639,6 +646,8 @@ public class CBLite extends CordovaPlugin {
                 PluginResult pluginResult;
                 if (resultCode == ResultCode.SUCCESS) {
                     pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
+                }  else if (resultCode == ResultCode.DOCUMENT_DOES_NOT_EXIST) {
+                    pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: document does not exist.");
                 } else {
                     pluginResult = new PluginResult(PluginResult.Status.ERROR, "Error deleting document.");
                 }

@@ -1,5 +1,6 @@
 package com.couchbase.cblite.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -7,7 +8,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 
 import com.couchbase.cblite.enums.ResultCode;
 import com.couchbase.cblite.objects.DatabaseArgument;
@@ -39,6 +39,7 @@ import com.couchbase.lite.ValueIndexConfiguration;
 import com.couchbase.lite.internal.utils.JSONUtils;
 
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,6 +47,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -320,7 +322,12 @@ public class DatabaseManager {
 
             Database db = databases.get(dbName).getDatabase();
             Document doc = db.getDocument(docId);
-            db.delete(doc);
+
+            if (doc != null) {
+                db.delete(doc);
+            } else {
+                return ResultCode.DOCUMENT_DOES_NOT_EXIST;
+            }
 
             return ResultCode.SUCCESS;
 
@@ -536,45 +543,64 @@ public class DatabaseManager {
         return ResultCode.ERROR.toString();
     }
 
-    public ResultCode addChangeListener(ListenerArgument listenerArgument, CallbackContext callbackContext) {
+   
+    public ResultCode addChangeListener(ListenerArgument listenerArgument, CordovaWebView webView) {
 
         String database = listenerArgument.getDatabaseName();
         if (!databases.containsKey(database)) {
             return ResultCode.DATABASE_DOES_NOT_EXIST;
         }
 
-        DatabaseResource dbResource = databases.get(database);
-        Database db = dbResource.getDatabase();
-        ListenerToken listenerToken = db.addChangeListener(new DatabaseChangeListener() {
-            @Override
-            public void changed(DatabaseChange change) {
+        String jsCallbackFn = listenerArgument.getCallback();
 
-                if (change != null) {
-                    for (String docId : change.getDocumentIDs()) {
-                        Document doc = db.getDocument(docId);
-                        if (doc != null) {
+        if (jsCallbackFn != null && !jsCallbackFn.trim().equals("")) {
 
-                            Log.i("DatabaseChangeEvent", "Document: " + doc.getId() + " was modified");
+            DatabaseResource dbResource = databases.get(database);
+            Database db = dbResource.getDatabase();
 
-                            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, "DatabaseChangeEvent: Document was added/updated.");
-                            pluginResult.setKeepCallback(true);
-                            callbackContext.sendPluginResult(pluginResult);
+            Map<String, ArrayList<String>> docChanges = new HashMap<>();
+            docChanges.put("deleted", new ArrayList<String>());
+            docChanges.put("addOrChanged", new ArrayList<String>());
 
-                        } else {
-                            Log.i("DatabaseChangeEvent", "Document: " + doc.getId() + " was deleted");
+            if (dbResource.getListenerToken() == null) {
+                ListenerToken listenerToken = db.addChangeListener(new DatabaseChangeListener() {
+                    @Override
+                    public void changed(DatabaseChange change) {
 
-                            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, "DatabaseChangeEvent: Document was deleted.");
-                            pluginResult.setKeepCallback(true);
-                            callbackContext.sendPluginResult(pluginResult);
+                        if (change != null) {
+                            for (String docId : change.getDocumentIDs()) {
+                                Document doc = db.getDocument(docId);
+                                if (doc == null) {
+                                    docChanges.get("deleted").add(docId);
+                                } else {
+                                    docChanges.get("addOrChanged").add(docId);
+                                }
+                            }
+
+                            try {
+                                String strDocChanges = "Found " + change.getDocumentIDs().size() + " change(s)";
+                                JSONObject object = new JSONObject();
+                                object.put("message", strDocChanges);
+                                object.put("docChanges", docChanges.toString());
+
+                                String params = object.toString();
+                                webView.loadUrl("javascript:" + jsCallbackFn + "(" + params + ")");
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
 
                         }
+
                     }
-                }
+                });
 
+                dbResource.setListenerToken(listenerToken);
+            } else {
+                return ResultCode.CHANGE_LISTENER_ALREADY_EXISTS;
             }
-        });
-
-        dbResource.setListenerToken(listenerToken);
+        }
 
         return ResultCode.SUCCESS;
     }
@@ -591,6 +617,7 @@ public class DatabaseManager {
 
         if (dbResource.getListenerToken() != null) {
             db.removeChangeListener(dbResource.getListenerToken());
+            dbResource.setListenerToken(null);
         }
 
         return ResultCode.SUCCESS;
