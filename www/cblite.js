@@ -62,9 +62,8 @@ cblite.prototype.closeDatabase = function (dbName, successCallback, errorCallbac
  * database configuration, the default configuration that is equivalent to
  * setting all properties in the configuration to nil will be used. 
  * 
- * @param resourceName 
- *          {string} name of the pre-built embedded database file in the
- *  		platform specific format
+ * @param fromPath 
+ *          {string} the source database path of the prebuilt database.
  * @param newConfig
  *          {DatabaseConfiguration} JSON object with new database
  *  		directory and encryptionKey properties.
@@ -74,9 +73,9 @@ cblite.prototype.closeDatabase = function (dbName, successCallback, errorCallbac
  *          {callback} javascript function to call if error happens in native 
  * 			code 
 */
-cblite.prototype.copyDatabase = function (resourceName, newConfig, successCallback, errorCallback) {
+cblite.prototype.copyDatabase = function (fromPath, newConfig, successCallback, errorCallback) {
 	let defaultConfig = {
-		resourceName: resourceName,
+		fromPath: fromPath,
 		newConfig: newConfig
 	};
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'copyDatabase', [defaultConfig]);
@@ -432,7 +431,7 @@ cblite.prototype.documentSetBlobFromFileUrl = function (documentId, databaseName
  *  		code 
 */
 cblite.prototype.enableLogging = function (domain, logLevel, successCallback, errorCallback) {
-	if (domain == null || logLevel) {
+	if (domain == null || logLevel == null) {
 		throw ('error: domain can not be null');
 	}
 	let args = {
@@ -470,6 +469,8 @@ cblite.prototype.query = function(dbName, query, successCallback, errorCallback)
  *
  * @param databaseName 
  *          {string} name of the database 
+ * @param query 
+ *          {string} N1QL query to attach listener to
  * @param callbackName 
  *          {callback} javascript function to call when changes are posted.  
  * @param successCallback 
@@ -478,33 +479,34 @@ cblite.prototype.query = function(dbName, query, successCallback, errorCallback)
  *          {callback} javascript function to call if error happens in native
  *  		code 
 */
-cblite.prototype.queryAddListener = function(databaseName, callbackName, successCallback, errorCallback) {
-	if (databaseName == null || callbackName == null) {
-		throw ("error: database name and callbackName can't be null");
+cblite.prototype.queryAddListener = function(databaseName, query, callbackName, successCallback, errorCallback) {
+	if (databaseName == null || query == null || callbackName == null) {
+		throw ("error: database name, query, or callbackName can't be null");
 	}
 	let args = {
 		dbName: databaseName,	
-		jsCallback: callbackName
+		jsCallback: callbackName,
+		query: query
 	};
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'queryAddChangeListener', [args]);
 }
 
 /* queryRemoveListener - Removes a query change listener. 
  *
- * @param databaseName 
- *          {string} name of the database to remove listener from
+ * @param query 
+ *          {string} N1QL query to remove listener
  * @param successCallback 
  *          {callback} javascript function to call if native code is successful 
  * @param errorCallback 
  *          {callback} javascript function to call if error happens in native 
  * 			code 
 */
-cblite.prototype.queryRemoveListener = function(databaseName, successCallback, errorCallback) {
-	if (databaseName == null) {
-		throw ("error: database name can't be null");
+cblite.prototype.queryRemoveListener = function(query, successCallback, errorCallback) {
+	if (query == null) {
+		throw ("error: query name can't be null");
 	}
 	let args = {
-		dbName: databaseName	
+		query: query	
 	};
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'queryRemoveChangeListener', [args]);
 }
@@ -705,6 +707,27 @@ cblite.prototype.replicationRemoveListener = function(databaseName, successCallb
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'replicationRemoveChangeListener', [args]);
 };
 
+/* getEmbeddedResourcePath - get's native file system path to embedded resource - helper method, no 
+ * cblite mapping to native api, more convience to Cordova developers 
+ *
+ * @param resourceName 
+ *          {string} name of the embeded resource where the database is stored 
+ * @param successCallback 
+ *          {callback} javascript function to call if native code is successful 
+ * @param errorCallback 
+ *          {callback} javascript function to call if error happens in native
+ *  		code 
+*/
+cblite.prototype.getEmbeddedResourcePath = function (resourceName, successCallback, errorCallback){
+	if (resourceName == null){
+		throw ("error: database name can't be null");
+	}
+	let args = new Object();
+	args.resourceName = resourceName;
+
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'getEmbeddedResourcePath', [args]);
+}
+
 /* getDocumentInfo - helper method to get document info for arguments 
  *
  * @param id 
@@ -809,7 +832,7 @@ cblite.prototype.ReplicatorConfiguration = function (databaseName, targetUrl){
     obj.authenticator = null; 
     obj.acceptOnlySelfSignedServerCertificate = false; 
     obj.pinnedServerCertificate = ""; 
-    obj.headers = [, ];
+    obj.headers = [];
     obj.channels = [];
     obj.documentIds = []; 
     obj.allowReplicatingInBackground = false; 

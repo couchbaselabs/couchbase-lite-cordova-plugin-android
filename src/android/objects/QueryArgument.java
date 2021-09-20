@@ -4,6 +4,7 @@ public class QueryArgument {
 
     private String databaseName;
     private String query;
+    private  String JSCallback;
 
     public  QueryArgument() {
 
@@ -23,5 +24,13 @@ public class QueryArgument {
 
     public void setQuery(String query) {
         this.query = query;
+    }
+
+    public String getJSCallback() {
+        return JSCallback;
+    }
+
+    public void setJSCallback(String JSCallback) {
+        this.JSCallback = JSCallback;
     }
 }

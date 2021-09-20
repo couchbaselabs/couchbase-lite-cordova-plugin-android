@@ -1,10 +1,11 @@
 package com.couchbase.cblite;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.AssetManager;
 
 import com.couchbase.cblite.enums.ResultCode;
 import com.couchbase.cblite.objects.DatabaseArgument;
+import com.couchbase.cblite.objects.DatabaseResource;
 import com.couchbase.cblite.objects.DeleteIndexArgument;
 import com.couchbase.cblite.objects.DocumentArgument;
 import com.couchbase.cblite.objects.FTSIndexArgument;
@@ -12,6 +13,11 @@ import com.couchbase.cblite.objects.ListenerArgument;
 import com.couchbase.cblite.objects.QueryArgument;
 import com.couchbase.cblite.objects.ValueIndexArgument;
 import com.couchbase.cblite.utils.DatabaseManager;
+import com.couchbase.lite.BasicAuthenticator;
+import com.couchbase.lite.Database;
+import com.couchbase.lite.ReplicatorConfiguration;
+import com.couchbase.lite.SessionAuthenticator;
+import com.couchbase.lite.URLEndpoint;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -21,8 +27,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class echoes a string called from JavaScript.
@@ -53,8 +65,16 @@ public class CBLite extends CordovaPlugin {
     private static final String ACTION_CREATE_FTS_INDEX = "createFTSIndex";
     private static final String ACTION_DELETE_INDEX = "deleteIndex";
 
-
     private static final String ACTION_ENABLE_LOGGING = "enableLogging";
+
+
+    private static final String ACTION_REPLICATOR_START = "replicatorStart";
+    private static final String ACTION_REPLICATOR_STOP = "replicatorStop";
+    private static final String ACTION_REPLICATION_ADD_LISTENER = "replicationAddChangeListener";
+    private static final String ACTION_REPLICATION_REMOVE_LISTENER = "replicationRemoveChangeListener";
+
+    private static final String QUERY_ADD_CHANGE_LISTENER = "queryAddChangeListener";
+    private static final String QUERY_REMOVE_CHANGE_LISTENER = "queryRemoveChangeListener";
 
     private Context context;
 
@@ -144,6 +164,28 @@ public class CBLite extends CordovaPlugin {
                 databaseExists(args, callbackContext);
                 return true;
 
+            case ACTION_REPLICATOR_START:
+                replicatorStart(args, callbackContext);
+                return true;
+
+            case ACTION_REPLICATOR_STOP:
+                replicatorStop(args, callbackContext);
+                return true;
+
+            case ACTION_REPLICATION_ADD_LISTENER:
+                replicationAddListener(args, callbackContext);
+                return true;
+
+            case ACTION_REPLICATION_REMOVE_LISTENER:
+                replicationRemoveListener(args, callbackContext);
+                return true;
+
+            case QUERY_ADD_CHANGE_LISTENER:
+                queryAddChangeListener(args, callbackContext);
+                return true;
+            case QUERY_REMOVE_CHANGE_LISTENER:
+                queryRemoveChangeListener(args, callbackContext);
+                return true;
             default:
                 return false;
         }
@@ -302,7 +344,6 @@ public class CBLite extends CordovaPlugin {
 
     }
 
-
     private void databaseExists(JSONArray args, CallbackContext callbackContext) {
 
         try {
@@ -331,20 +372,24 @@ public class CBLite extends CordovaPlugin {
 
     }
 
-
     private void closeDatabase(JSONArray args, CallbackContext callbackContext) {
 
         try {
 
-
+            PluginResult pluginResult;
             String dbName = args.getString(0);
+            if (dbName.equals("")) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
+                pluginResult.setKeepCallback(false);
+                callbackContext.sendPluginResult(pluginResult);
+                return;
+            }
+
             DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
             DatabaseArgument arg = new DatabaseArgument();
             arg.setName(dbName);
             ResultCode result = dbMgr.closeDatabase(arg);
 
-
-            PluginResult pluginResult;
             if (result == ResultCode.SUCCESS) {
                 pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
             } else if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
@@ -373,7 +418,7 @@ public class CBLite extends CordovaPlugin {
 
             PluginResult pluginResult;
             JSONObject configs = args.getJSONObject(0);
-            String resourceDbName = configs.getString("resourceName");
+            String resourceDbName = configs.getString("fromPath");
 
             if (resourceDbName.equals("")) {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
@@ -387,13 +432,15 @@ public class CBLite extends CordovaPlugin {
             newDbArgs = parseDatabaseArguments(newConfig, callbackContext);
 
             DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-            ResultCode result = dbMgr.copyDatabase(resourceDbName,context, newDbArgs);
+            ResultCode result = dbMgr.copyDatabase(resourceDbName, context, newDbArgs);
 
             if (result == ResultCode.SUCCESS) {
                 pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
+            } else if (result == ResultCode.INVALID_DB_NAME) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: trying to copy database but new name or current name isn't correctly passed as arguments.");
             } else if (result == ResultCode.MISSING_PARAM) {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
-            } else  {
+            } else {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: error copying database, please ensure the resource file you are trying to copy exists.");
             }
 
@@ -462,7 +509,7 @@ public class CBLite extends CordovaPlugin {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database does not exist.");
             } else if (result == ResultCode.ERROR) {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: adding change listener.");
-            } else if (result == ResultCode.CHANGE_LISTENER_ALREADY_EXISTS){
+            } else if (result == ResultCode.CHANGE_LISTENER_ALREADY_EXISTS) {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "error:  listener token already exists for this database, remove first before trying to add a new listener.");
             } else {
                 pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
@@ -501,6 +548,8 @@ public class CBLite extends CordovaPlugin {
 
             if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database does not exist.");
+            } else if (result == ResultCode.CHANGE_LISTENER_DOES_NOT_EXISTS) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: couldn't find listener token to remove");
             } else if (result == ResultCode.ERROR) {
                 pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: error removing change listener.");
             } else {
@@ -646,7 +695,7 @@ public class CBLite extends CordovaPlugin {
                 PluginResult pluginResult;
                 if (resultCode == ResultCode.SUCCESS) {
                     pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
-                }  else if (resultCode == ResultCode.DOCUMENT_DOES_NOT_EXIST) {
+                } else if (resultCode == ResultCode.DOCUMENT_DOES_NOT_EXIST) {
                     pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: document does not exist.");
                 } else {
                     pluginResult = new PluginResult(PluginResult.Status.ERROR, "Error deleting document.");
@@ -849,18 +898,19 @@ public class CBLite extends CordovaPlugin {
         try {
             String name = dictionary.has("dbName") ? dictionary.getString("dbName").toLowerCase() : null;
             String query = dictionary.has("query") ? dictionary.getString("query") : null;
+            String jsCallback = dictionary.has("jsCallback") ? dictionary.getString("jsCallback") : null;
 
-            if (name == null || query == null) {
+            if (name == null || query == null) { //|| jsCallback == null || jsCallback.isEmpty()
 
                 PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: missing arguments.");
                 pluginResult.setKeepCallback(false);
                 callbackContext.sendPluginResult(pluginResult);
-
                 return null;
             }
 
             argument.setDatabaseName(name);
             argument.setQuery(query);
+            argument.setJSCallback(jsCallback);
 
             return argument;
 
@@ -1015,7 +1065,6 @@ public class CBLite extends CordovaPlugin {
 
             argument.setIndexExpressions(indexes);
 
-
             return argument;
 
         } catch (JSONException e) {
@@ -1089,8 +1138,6 @@ public class CBLite extends CordovaPlugin {
         }
 
         return argument;
-
-
     }
 
     private void deleteIndex(JSONArray args, CallbackContext callbackContext) {
@@ -1127,5 +1174,443 @@ public class CBLite extends CordovaPlugin {
         }
     }
 
+    private void replicatorStart(JSONArray args, CallbackContext callbackContext) {
 
+        try {
+
+            ReplicatorConfiguration config = parseReplicatorConfiguration(args.getJSONObject(0), callbackContext);
+
+            if (config != null) {
+
+                DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
+                ResultCode result = dbMgr.replicatorStart(config);
+
+                PluginResult pluginResult;
+                if (result == ResultCode.SUCCESS) {
+                    pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
+                } else if (result == ResultCode.MISSING_PARAM) {
+                    pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Invalid or missing parameters");
+                } else if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
+                    pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Database does not exist.");
+                } else {
+                    pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Error trying to start replicator");
+                }
+
+                pluginResult.setKeepCallback(false);
+                callbackContext.sendPluginResult(pluginResult);
+
+            } else {
+
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Invalid or missing parameters.");
+                pluginResult.setKeepCallback(false);
+                callbackContext.sendPluginResult(pluginResult);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
+            pluginResult.setKeepCallback(false);
+            callbackContext.sendPluginResult(pluginResult);
+        }
+
+    }
+
+    private void replicatorStop(JSONArray args, CallbackContext callbackContext) {
+
+        try {
+
+            PluginResult pluginResult;
+            JSONObject config = args.getJSONObject(0);
+
+            String dbName = config.has("dbName") ? config.getString("dbName") : null;
+
+            if (dbName == null || dbName.isEmpty()) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
+                pluginResult.setKeepCallback(false);
+                callbackContext.sendPluginResult(pluginResult);
+                return;
+            }
+
+            DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
+            ResultCode resultCode = dbMgr.replicatorStop(dbName);
+
+            if (resultCode == ResultCode.SUCCESS) {
+                pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
+            } else if (resultCode == ResultCode.DATABASE_DOES_NOT_EXIST) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no databases found in collection, please open/create a database first.");
+            } else if (resultCode == ResultCode.REPLICATOR_DOES_NOT_EXIST) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: replicator not found.");
+            } else {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "Error stopping replicator.");
+            }
+
+            pluginResult.setKeepCallback(false);
+            callbackContext.sendPluginResult(pluginResult);
+
+        } catch (JSONException e) {
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
+            pluginResult.setKeepCallback(false);
+            callbackContext.sendPluginResult(pluginResult);
+        }
+
+    }
+
+    private void replicationAddListener(JSONArray args, CallbackContext callbackContext) {
+        try {
+
+            JSONObject params = args.getJSONObject(0);
+
+            PluginResult pluginResult;
+            ListenerArgument arguments = parseListenerArguments(params);
+
+            if (arguments == null) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database name must be passed in as argument.");
+                pluginResult.setKeepCallback(false);
+                callbackContext.sendPluginResult(pluginResult);
+                return;
+            }
+
+            DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
+
+            CordovaWebView cdv = this.webView;
+            ResultCode result = dbMgr.replicationAddChangeListener(arguments, cdv);
+
+            if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database does not exist.");
+            } else if (result == ResultCode.REPLICATOR_DOES_NOT_EXIST) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: replicator does not exist. Please create a replicator first to add the listener.");
+            } else if (result == ResultCode.ERROR) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: adding change listener.");
+            } else if (result == ResultCode.REPLICATOR_LISTENER_ALREADY_EXISTS) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error:  replicator listener token already exists for this database, remove first before trying to add a new listener.");
+            } else {
+                pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
+            }
+
+            pluginResult.setKeepCallback(true);
+            callbackContext.sendPluginResult(pluginResult);
+
+        } catch (JSONException e) {
+
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
+            pluginResult.setKeepCallback(false);
+            callbackContext.sendPluginResult(pluginResult);
+            e.printStackTrace();
+        }
+
+    }
+
+    private void replicationRemoveListener(JSONArray args, CallbackContext callbackContext) {
+
+        try {
+
+            JSONObject params = args.getJSONObject(0);
+
+            PluginResult pluginResult;
+            ListenerArgument arguments = parseListenerArguments(params);
+
+            if (arguments == null) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database name must be passed in as argument.");
+                pluginResult.setKeepCallback(false);
+                callbackContext.sendPluginResult(pluginResult);
+                return;
+            }
+
+            DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
+            ResultCode result = dbMgr.replicationRemoveChangeListener(arguments);
+
+            if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database does not exist.");
+            } else if (result == ResultCode.REPLICATOR_LISTENER_DOES_NOT_EXISTS) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: couldn't find replicator listener token to remove");
+            } else if (result == ResultCode.ERROR) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: error removing change listener.");
+            } else {
+                pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
+            }
+
+            pluginResult.setKeepCallback(false);
+            callbackContext.sendPluginResult(pluginResult);
+
+        } catch (JSONException e) {
+
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
+            pluginResult.setKeepCallback(false);
+            callbackContext.sendPluginResult(pluginResult);
+            e.printStackTrace();
+        }
+    }
+
+    private void queryAddChangeListener(JSONArray args, CallbackContext callbackContext) {
+        try {
+
+            JSONObject params = args.getJSONObject(0);
+            QueryArgument queryArgument = parseQueryArguments(params, callbackContext);
+
+            if (queryArgument != null) {
+                DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
+                CordovaWebView cdv = this.webView;
+                ResultCode result = dbMgr.queryAddChangeListener(queryArgument, cdv);
+
+                PluginResult pluginResult;
+                if (result == ResultCode.SUCCESS) {
+                    pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
+                } else if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
+                    pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database does not exist.");
+                } else if (result == ResultCode.INVALID_QUERY) {
+                    pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Invalid Query.");
+                }else if (result == ResultCode.COULD_NOT_CREATE_QUERY) {
+                    pluginResult = new PluginResult(PluginResult.Status.ERROR, "couldn't create new query to get key based on query description.");
+                } else if (result == ResultCode.QUERY_LISTENER_ALREADY_EXISTS) {
+                    pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: query listener token already exists for this database, remove first before trying to add a new listener.");
+                } else {
+                    pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: error in executing query.");
+                }
+                pluginResult.setKeepCallback(false);
+                callbackContext.sendPluginResult(pluginResult);
+            }
+
+        } catch (JSONException e) {
+
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
+            pluginResult.setKeepCallback(false);
+            callbackContext.sendPluginResult(pluginResult);
+            e.printStackTrace();
+        }
+    }
+
+    private void queryRemoveChangeListener(JSONArray args, CallbackContext callbackContext) {
+
+        try {
+
+            JSONObject params = args.getJSONObject(0);
+
+            String queryString = params.has("query") ? params.getString("query") : null;
+            String dbName = params.has("dbName") ? params.getString("dbName") : null;
+
+            PluginResult pluginResult;
+            if (dbName == null) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database name must be passed in as argument.");
+                pluginResult.setKeepCallback(false);
+                callbackContext.sendPluginResult(pluginResult);
+                return;
+            }
+
+            if (queryString == null || queryString.isEmpty()) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: query must be passed in as argument.");
+                pluginResult.setKeepCallback(false);
+                callbackContext.sendPluginResult(pluginResult);
+                return;
+            }
+
+            DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
+            ResultCode result = dbMgr.queryRemoveChangeListener(queryString, dbName);
+
+            if (result == ResultCode.DATABASE_OR_QUERY_RESOURCE_DOES_NOT_EXIST) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error:  no databases or query resources found in collection, please open/create a database first or create query listener first.");
+            } else if (result == ResultCode.QUERY_RESOURCE_DOES_NOT_EXIST) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: couldn't find query resource, make sure it exists before removing the listener.");
+            }else if (result == ResultCode.QUERY_LISTENER_DOES_NOT_EXIST) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: couldn't find query listener token to remove.");
+            } else if (result == ResultCode.ERROR) {
+                pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: error removing query change listener.");
+            } else {
+                pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
+            }
+
+            pluginResult.setKeepCallback(false);
+            callbackContext.sendPluginResult(pluginResult);
+
+        } catch (JSONException e) {
+
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
+            pluginResult.setKeepCallback(false);
+            callbackContext.sendPluginResult(pluginResult);
+            e.printStackTrace();
+        }
+    }
+
+    private ReplicatorConfiguration parseReplicatorConfiguration(JSONObject dictionary, CallbackContext callbackContext) {
+        ReplicatorConfiguration config = null;
+        Database database;
+
+        try {
+            String dbName = dictionary.has("databaseName") ? dictionary.getString("databaseName").toLowerCase() : null;
+            String targetUrl = dictionary.has("target") ? dictionary.getString("target") : null;
+
+            if (dbName == null || dbName.isEmpty() || targetUrl == null || targetUrl.isEmpty()) {
+
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database name and targetUrl must be passed in as arguments.");
+                pluginResult.setKeepCallback(false);
+                callbackContext.sendPluginResult(pluginResult);
+
+                return null;
+            }
+
+            DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
+            DatabaseResource dbr = dbMgr.getDatabases().get(dbName);
+            if (dbr != null) {
+                database = dbr.getDatabase();
+            } else {
+                DatabaseArgument dbArgs = new DatabaseArgument();
+                dbArgs.setName(dbName);
+
+                ResultCode resultCode = dbMgr.createOrOpenDatabase(dbArgs);
+
+                if (resultCode == ResultCode.ERROR) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: couldn't open database for replication.");
+                    pluginResult.setKeepCallback(false);
+                    callbackContext.sendPluginResult(pluginResult);
+                    return null;
+                } else {
+                    DatabaseResource dbr2 = dbMgr.getDatabases().get(dbName);
+                    database = dbr2.getDatabase();
+                }
+            }
+
+            URI url = new URI(targetUrl);
+
+            if (database.getName().equals(dbName)) {
+                config = new ReplicatorConfiguration(database, new URLEndpoint(url));
+
+                if (dictionary.has("continuous")) {
+                    config.setContinuous(dictionary.getBoolean("continuous"));
+                }
+
+                if (dictionary.has("headers")) {
+
+                    JSONArray headersArr = dictionary.getJSONArray("headers");
+
+                    if (headersArr.length() > 0) {
+                        Map<String, String> headerMap = new HashMap<>();
+                        for (int i = 0; i < headersArr.length(); i++) {
+                            JSONObject obj = headersArr.getJSONObject(i);
+                            String k = obj.keys().next();
+                            String v = obj.getString(k);
+                            headerMap.put(k, v);
+                        }
+                        config.setHeaders(headerMap);
+                    } else {
+                        config.setHeaders(null);
+                    }
+                }
+
+                if (dictionary.has("channels")) {
+
+                    JSONArray channelsArr = dictionary.getJSONArray("channels");
+
+                    if (channelsArr.length() > 0) {
+
+                        List<String> channels = new ArrayList<>();
+                        for (int i = 0; i < channelsArr.length(); i++) {
+                            channels.add(channelsArr.getString(i));
+                        }
+                        config.setChannels(channels);
+                    } else {
+                        config.setChannels(null);
+                    }
+                }
+
+                if (dictionary.has("documentIds")) {
+
+                    JSONArray documentIdsArr = dictionary.getJSONArray("documentIds");
+
+                    if (documentIdsArr.length() > 0) {
+
+                        List<String> documentIds = new ArrayList<>();
+                        for (int i = 0; i < documentIdsArr.length(); i++) {
+                            documentIds.add(documentIdsArr.getString(i));
+                        }
+                        config.setDocumentIDs(documentIds);
+                    } else {
+                        config.setDocumentIDs(null);
+                    }
+                }
+
+                if (dictionary.has("replicatorType")) {
+                    // TODO
+                    //config.setReplicatorType()  Deprecated ??
+
+                  /*  String replicatorType = dictionary.getString("replicatorType");
+
+                    switch(replicatorType) {
+                        case "PULL":
+                            config.setReplicatorType(ReplicatorConfiguration.ReplicatorType.PULL);
+                            break;
+                        case "PUSH":
+                            config.setReplicatorType(ReplicatorConfiguration.ReplicatorType.PUSH);
+                            break;
+                        default:
+                            config.setReplicatorType(ReplicatorConfiguration.ReplicatorType.PUSH_AND_PULL);
+                    }*/
+
+                }
+
+                if (dictionary.has("allowReplicatingInBackground")) {
+                    // TODO
+                    // not available for android ??;
+                }
+
+                if (dictionary.has("acceptOnlySelfSignedServerCertificate")) {
+                    config.setAcceptOnlySelfSignedServerCertificate(dictionary.getBoolean("acceptOnlySelfSignedServerCertificate"));
+                }
+
+                if (dictionary.has("pinnedServerCertificateUri")) {
+                    String pinnedServerCertificateUri = dictionary.getString("pinnedServerCertificateUri");
+                    byte[] pinnedServerCert = this.getPinnedCertFile(context, pinnedServerCertificateUri);
+                    // Set pinned certificate.
+                    config.setPinnedServerCertificate(pinnedServerCert);
+                }
+
+                if (dictionary.has("heartbeat")) {
+                    config.setHeartbeat(dictionary.getInt("heartbeat"));
+                }
+
+                if (dictionary.has("authenticator")) {
+                    JSONObject authObj = dictionary.getJSONObject("authenticator");
+
+                    if (authObj.has("authType")  && authObj.getString("authType").equalsIgnoreCase("Basic")) {
+                        String username = authObj.has("username") ? authObj.getString("username") : null;
+                        String password = authObj.has("password") ? authObj.getString("password") : null;
+
+                        if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
+                            char[] passwordCharArray = new char[password.length()];
+
+                            for (int i = 0; i < password.length(); i++) {
+                                passwordCharArray[i] = password.charAt(i);
+                            }
+                            config.setAuthenticator(new BasicAuthenticator(username, passwordCharArray));
+                        }
+                    } else if (authObj.has("authType") && authObj.getString("authType").equalsIgnoreCase("Session")){
+                        String sessionId = authObj.getString("sessionId");
+                        if (!sessionId.isEmpty()) {
+                            String cookieName = authObj.getString("cookieName");
+                            if (!cookieName.isEmpty()) {
+                                config.setAuthenticator(new SessionAuthenticator(sessionId, cookieName));
+                            } else {
+                                config.setAuthenticator(new SessionAuthenticator(sessionId));
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (JSONException | URISyntaxException e) {
+            config = null;
+            e.printStackTrace();
+        }
+        return config;
+    }
+
+    private byte[] getPinnedCertFile(Context context, String resource) {
+        AssetManager assetManager = context.getAssets();
+        InputStream is = null;
+        try {
+            is = assetManager.open(resource + ".cer");
+            return new byte[is.available()];
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
