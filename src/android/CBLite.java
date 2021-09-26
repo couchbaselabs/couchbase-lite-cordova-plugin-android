@@ -55,9 +55,9 @@ public class CBLite extends CordovaPlugin {
     private static final String ACTION_GET_DOCUMENT = "getDocument";
 
 
-    private static final String ACTION_MUTABLE_DOCUMENT_SET_BLOB = "mutableDocumentSetBlob";
-    private static final String ACTION_MUTABLE_DOCUMENT_SET_BLOB_EMBEDDED = "mutableDocumentSetBlobFromEmbeddedResource";
-    private static final String ACTION_MUTABLE_DOCUMENT_SET_BLOB_FILE_URL = "mutableDocumentSetBlobFromFileUrl";
+    private static final String ACTION_SAVE_BLOB = "saveBlob";
+    private static final String ACTION_SAVE_BLOB_EMBEDDED_RESOURCE = "saveBlobFromEmbeddedResource";
+    private static final String ACTION_SAVE_BLOB_FILE_URL = "saveBlobFromFileUrl";
     private static final String ACTION_GET_BLOB = "getBlob";
 
     private static final String ACTION_QUERY_DATABASE = "queryDb";
@@ -114,16 +114,16 @@ public class CBLite extends CordovaPlugin {
                 mutableDocumentSetString(args, callbackContext);
                 return true;
 
-            case ACTION_MUTABLE_DOCUMENT_SET_BLOB:
-                mutableDocumentSetBlob(args, callbackContext);
+            case ACTION_SAVE_BLOB:
+                saveBlob(args, callbackContext);
                 return true;
 
-            case ACTION_MUTABLE_DOCUMENT_SET_BLOB_EMBEDDED:
-                mutableDocumentSetBlobFromEmbeddedResource(args, callbackContext);
+          case ACTION_SAVE_BLOB_EMBEDDED_RESOURCE:
+                saveBlobFromEmbeddedResource(args, callbackContext);
                 return true;
 
-            case ACTION_MUTABLE_DOCUMENT_SET_BLOB_FILE_URL:
-                mutableDocumentSetBlobFromFileURL(args, callbackContext);
+          case ACTION_SAVE_BLOB_FILE_URL:
+                saveBlobFromFileURL(args, callbackContext);
                 return true;
 
             case ACTION_GET_BLOB:
@@ -756,7 +756,7 @@ public class CBLite extends CordovaPlugin {
         }
     }
 
-    private void mutableDocumentSetBlob(JSONArray args, CallbackContext callbackContext) {
+    private void saveBlob(JSONArray args, CallbackContext callbackContext) {
 
         try {
 
@@ -764,7 +764,7 @@ public class CBLite extends CordovaPlugin {
 
             DocumentArgument docArgs = parseDocumentArguments(params);
             DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-            String result = dbMgr.createDocumentBlob(docArgs);
+            String result = dbMgr.saveBlob(docArgs);
 
             PluginResult pluginResult;
             if (result == null) {
@@ -796,7 +796,7 @@ public class CBLite extends CordovaPlugin {
 
     }
 
-    private void mutableDocumentSetBlobFromEmbeddedResource(JSONArray args, CallbackContext callbackContext) {
+    private void saveBlobFromEmbeddedResource(JSONArray args, CallbackContext callbackContext) {
 
         try {
 
@@ -804,7 +804,7 @@ public class CBLite extends CordovaPlugin {
 
             DocumentArgument docArgs = parseDocumentArguments(params);
             DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-            String result = dbMgr.createDocumentBlobFromEmbeddedResource(docArgs, context);
+            String result = dbMgr.saveBlobFromEmbeddedResource(docArgs, context);
 
             PluginResult pluginResult;
             if (result == null) {
@@ -835,7 +835,7 @@ public class CBLite extends CordovaPlugin {
         }
     }
 
-    private void mutableDocumentSetBlobFromFileURL(JSONArray args, CallbackContext callbackContext) {
+    private void saveBlobFromFileURL(JSONArray args, CallbackContext callbackContext) {
 
         try {
 
@@ -843,7 +843,7 @@ public class CBLite extends CordovaPlugin {
 
             DocumentArgument docArgs = parseDocumentArguments(params);
             DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-            String result = dbMgr.createDocumentBlobFromFileURL(docArgs, context);
+            String result = dbMgr.saveBlobFromFileURL(docArgs, context);
 
             PluginResult pluginResult;
 

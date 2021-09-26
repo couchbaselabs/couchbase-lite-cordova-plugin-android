@@ -276,17 +276,13 @@ cblite.prototype.getBlob = function(dbName, blobMetadata, successCallback, error
 	}
 };
 
-/* mutableDocumentSetBlob - Set a Blob object for the given key.  NOTE: 
+/* saveBlob - Saves blob on the database.  NOTE: 
  * successCallback returns metadata that must be used to retreive the blob
  * using the getBlob function.  It's very important that you keep a reference
  * to the metadata if you need to retreive the blob. 
  *
- * @param documentId 
- *           {string} id/key of the document to update 
  * @param databaseName 
  *          {string} name of the database to retreive document from 
- * @param key 
- *          {string} string of key (property) to associate blob metadata with 
  * @param contentType 
  *          {string} type of blob data you are storing  
  * @param blobData
@@ -297,30 +293,26 @@ cblite.prototype.getBlob = function(dbName, blobMetadata, successCallback, error
  *          {callback} javascript function to call if error happens in native 
  * 			code 
 */
-cblite.prototype.mutableDocumentSetBlob = function (documentId, databaseName, key, contentType, blobData, successCallback, errorCallback) {
-	if (documentId == null) {
-		throw ('error: documentId can not be null');
-	}	
+cblite.prototype.saveBlob = function (databaseName, contentType, blobData, successCallback, errorCallback) {
+	
 	if (contentType == null) {
 		throw ('error: contentType can not be null');
 	}
-	if (key == null || blobData == null) {
-		throw ('error: key/blob can not be null');
+	if (blobData == null) {
+		throw ('error: blob can not be null');
 	}
 	if (databaseName == null) {
 		throw ('error: dbName can not be null');
 	}
 	let args = {
-		dbName: databaseName,
-		id: documentId,
-		key: key,
+		dbName: databaseName,				
 		contentType: contentType,
 		blobData: blobData,
 	};
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'mutableDocumentSetBlob', [args]);
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'saveBlob', [args]);
 };
 
-/* documentSetBlobFromEmbeddedResource - Set a Blob object for the given key
+/* saveBlobFromEmbeddedResource - Saves Blob object 
  * from a file that is embedded in the Native project (AssetCatalog for iOS and
  * Resource folder for Android).  NOTE: successCallback returns metadata that
  * must be used  to retreive the blob using the getBlob function.  It's very
@@ -328,14 +320,10 @@ cblite.prototype.mutableDocumentSetBlob = function (documentId, databaseName, ke
  * the blob.  This is a helper function for javascript developers with no
  * Native equivilant call. 
  *
- * @param documentId 
- *           {string} id/key of the document to update 
  * @param databaseName 
  *          {string} name of the database to retreive document from 
  * @param contentType 
  *          {string} type of blob data you are storing 
- * @param key 
- *          {string} string of key (property) to associate blob metadata with 
  * @param resourceName 
  *          {string} string of native resource to use for blob data 
  * @param successCallback 
@@ -344,30 +332,25 @@ cblite.prototype.mutableDocumentSetBlob = function (documentId, databaseName, ke
  *          {callback} javascript function to call if error happens in native
  *  		code 
 */
-cblite.prototype.documentSetBlobFromEmbeddedResource = function (documentId, databaseName, contentType, key, resourceName, successCallback, errorCallback){
+cblite.prototype.saveBlobFromEmbeddedResource = function (databaseName, contentType, resourceName, successCallback, errorCallback){
 	if (databaseName == null) {
 		throw ('error: dbName can not be null');
 	}
-	if (documentId == null) {
-		throw('error: documentId can not be null');
-	}	
 	if (contentType == null) {
 		throw ('error: contentType can not be null');
 	}
-	if (key == null || resourceName == null) {
+	if (resourceName == null) {
 		throw ('error: key/blob can not be null');
 	}
 	let args = {
 		dbName: databaseName,
-		id: documentId,
-		key: key,
 		contentType: contentType,
 		resourceName: resourceName,
 	};
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'mutableDocumentSetBlobFromEmbeddedResource', [args]);
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'saveBlobFromEmbeddedResource', [args]);
 };
 
-/* documentSetBlobFromFileUrl - Set a Blob object for the given key from 
+/* saveBlobFromFileUrl - Saves Blob object from 
  * a file that is saved on the device in a folder accessible by the application.
  * This might require application configuration changes to allow application to
  * read files stored on the device.
@@ -377,14 +360,10 @@ cblite.prototype.documentSetBlobFromEmbeddedResource = function (documentId, dat
  * reference to the metadata if you need to retreive the blob.  This is a
  * helper function for javascript developers with no Native equivilant call. 
  *
- * @param documentId 
- *           {string} id/key of the document to update 
  * @param databaseName 
  *          {string} name of the database to update document
  * @param contentType 
  *          {string} type of blob data you are storing 
- * @param key 
- *          {string} string of key (property) to associate blob metadata with 
  * @param fileUrl 
  *          {string} string value of the path to the file to use for blob data 
  * @param successCallback 
@@ -393,27 +372,23 @@ cblite.prototype.documentSetBlobFromEmbeddedResource = function (documentId, dat
  *          {callback} javascript function to call if error happens in native
  *  		code 
 */
-cblite.prototype.documentSetBlobFromFileUrl = function (documentId, databaseName, contentType, key, fileUrl, successCallback, errorCallback){
+cblite.prototype.saveBlobFromFileUrl = function (databaseName, contentType, fileUrl, successCallback, errorCallback){
 	if (databaseName == null) {
 		throw ('error: dbName can not be null');
 	}	
-	if (documentId == null) {
-		throw ('error: documentId can not be null');
-	}	
+
 	if (contentType == null) {
 		throw ('error: contentType can not be null');
 	}
-	if (key == null || fileUrl == null) {
-		throw ('error: key/fileUrl can not be null');
+	if (fileUrl == null) {
+		throw ('error: fileUrl can not be null');
 	}
 	let args = {
 		dbName: databaseName,
-		id: documentId,
-		key: key,
 		contentType: contentType,
 		fileUrl: fileUrl,
 	};
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'mutableDocumentSetBlobFromFileUrl', [args]);
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'saveBlobFromFileURL', [args]);
 };
 
 /* enableLogging - Log allows to configure console and file logger or to set a 
