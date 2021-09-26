@@ -27,9 +27,9 @@ This is WIP
 | mutableDocumentSetString | MutableDocument |
 | getDocument | MutableDocument |
 | deleteDocument | MutableDocument |
-| mutableDocumentSetBlob  | MutableDocument |
-| documentSetBlobFromEmbeddedResource | MutableDocument |
-| documentSetBlobFromFileUrl | MutableDocument |
+| saveBlob  | Database |
+| saveBlobFromEmbeddedResource | Database |
+| saveBlobFromFileURL | Database |
 | getBlob  | Database |
 | enableLogging  | Database |
 | createValueIndex  | Database  |
@@ -228,37 +228,31 @@ CBL.deleteDocument(id, dbName, function(result) { }, function(error) { });
 ```
 
 
-**Set Blob using Base64**
+**Save Blob using Base64**
 ```
-let id = "{{DOCUMENT_ID}}"
 let dbName = "{{DATABASE_NAME}}";
-let key = "{{BLOB_KEY}}";
 let contentType = "{{CONTENT_TYPE}}";
 let blobData = "{{BLOB_DATA}}"; <== Base64
 
-CBL.mutableDocumentSetBlob(id, dbName, key, contentType, blobData, function(rs) { }, function(err) {  });
+CBL.saveBlob(dbName, contentType, blobData, function(rs) { }, function(err) {  });
 ```
 
-**Set Blob using Embedded Resource**
+**Save Blob using Embedded Resource**
 ```
-let id = "{{DOCUMENT_ID}}"
 let dbName = "{{DATABASE_NAME}}";
-let key = "{{BLOB_KEY}}";
 let contentType = "{{CONTENT_TYPE}}";
 let drawableResource = "{{RESOURCE_NAME}}"; <== asset placed under drawable directory (native)
 
-CBL.mutableDocumentSetBlob(id, dbName, contentType, key, drawableResource, function(rs) { }, function(err) { });
+CBL.saveBlobFromEmbeddedResource(dbName, contentType, drawableResource, function(rs) { }, function(err) { });
 ```
 
-**Set Blob using Native File URL**
+**Save Blob using Native File URL**
 ```
-let id = "{{DOCUMENT_ID}}";
 let dbName = "{{DATABASE_NAME}}";
-let key = "{{BLOB_KEY}}";
 let contentType = "{{CONTENT_TYPE}}";
 let imageURL = "{{NATIVE_FILE_URL}}";
 
-CBL.mutableDocumentSetBlob(id, dbName, contentType, key, imageURL, function(rs) { }, function(err) { });
+CBL.saveBlobFromFileURL(dbName, contentType, imageURL, function(rs) { }, function(err) { });
 ```
 
 **Get Blob**
