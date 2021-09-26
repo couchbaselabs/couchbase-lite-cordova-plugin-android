@@ -336,7 +336,7 @@ CBL.query(dbName, query, function(rs) { }, function(error) { });
 
 ```
 
-** Start Replicator**
+**Start Replicator**
 
 ```
 let dbName = "{{DATABASE_NAME}}";
@@ -350,7 +350,7 @@ CBL.replicatorStart(replicatorConfig, function(rs) {  console.log(rs); }, functi
 
 ```
 
-** Stop Replicator **
+**Stop Replicator**
 
 ```
 let dbName = "{{DATABASE_NAME}}";
@@ -358,7 +358,7 @@ CBL.replicatorStop(dbName, function(rs) {  console.log(rs); }, function(err) { c
 
 ```
 
-** Add replicator listener **
+**Add replicator listener**
 
 ```
 let dbName = "{{DATABASE_NAME}}";
@@ -367,7 +367,7 @@ CBL.replicationAddListener(dbName, 'replicatorCB', function(rs) { console.log(rs
 
 ```
 
-** Remove replicator listener **
+**Remove replicator listener**
 
 ```
 let dbName = "{{DATABASE_NAME}}";
@@ -376,7 +376,7 @@ CBL.replicationRemoveListener(dbName, function(rs) { console.log(rs) }, function
 
 ```
 
-** queryAddListener **
+**queryAddListener**
 ```
 let dbName = "{{DATABASE_NAME}}";
 let onQueryChange = function (rs) { console.log(rs) };
@@ -385,7 +385,7 @@ CBL.queryAddListener(dbName, query, 'onQueryChange', function (rs) { console.log
 ```
 
 
-** queryRemoveListener **
+**queryRemoveListener**
 ```
 let dbName = "{{DATABASE_NAME}}";
 let query = "{{QUERY_STRING}}";
