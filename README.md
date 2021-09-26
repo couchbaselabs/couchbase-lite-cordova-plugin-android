@@ -36,7 +36,12 @@ This is WIP
 | createFTSIndex  | Database |
 | deleteIndex  | Database |
 | query  | Query |
-
+| replicatorStart | Replicator |
+| replicatorStop | Replicator |
+| replicationAddListener | Replicator |
+| replicationRemoveListener | Replicator |
+| queryAddListener | Query |
+| queryRemoveListener | Query |
 
 
 ## Getting Started
@@ -329,6 +334,62 @@ let dbName = "{{DATABASE_NAME}}";
 let query = "{{QUERY_STRING}}";
 CBL.query(dbName, query, function(rs) { }, function(error) { });
 
+```
+
+** Start Replicator**
+
+```
+let dbName = "{{DATABASE_NAME}}";
+var replicatorConfig = CBL.ReplicatorConfiguration(dbName,'ws://{{SYNC_GATEWAY_IP}}/{{dbName}}');
+replicatorConfig.continuous = {{true/false}};
+replicatorConfig.authenticator = CBL.BasicAuthenticator('{{USERNAME}}', '{{PASSWORD}}');
+replicatorConfig.channels = ['channel.{{USERNAME}}'];
+replicatorConfig.replicatorType = CBL.ReplicatorType.PUSH_AND_PULL; // PUSH / PULL / PUSH_AND_PULL
+
+CBL.replicatorStart(replicatorConfig, function(rs) {  console.log(rs); }, function(err) { console.log(err) });
+
+```
+
+** Stop Replicator **
+
+```
+let dbName = "{{DATABASE_NAME}}";
+CBL.replicatorStop(dbName, function(rs) {  console.log(rs); }, function(err) { console.log(err) });
+
+```
+
+** Add replicator listener **
+
+```
+let dbName = "{{DATABASE_NAME}}";
+let replicatorCB = function (rs) { console.log(rs) };
+CBL.replicationAddListener(dbName, 'replicatorCB', function(rs) { console.log(rs) }, function(err) { console.log(err) });
+
+```
+
+** Remove replicator listener **
+
+```
+let dbName = "{{DATABASE_NAME}}";
+let replicatorCB = function (rs) { console.log(rs) };
+CBL.replicationRemoveListener(dbName, function(rs) { console.log(rs) }, function(err) { console.log(err) });
+
+```
+
+** queryAddListener **
+```
+let dbName = "{{DATABASE_NAME}}";
+let onQueryChange = function (rs) { console.log(rs) };
+let query = "{{QUERY_STRING}}";
+CBL.queryAddListener(dbName, query, 'onQueryChange', function (rs) { console.log(rs); }, function (err) { console.log(err)});
+```
+
+
+** queryRemoveListener **
+```
+let dbName = "{{DATABASE_NAME}}";
+let query = "{{QUERY_STRING}}";
+CBL.queryRemoveListener(dbName, query, function (rs) { console.log(rs); }, function (err) { console.log(err)});
 ```
 
 
