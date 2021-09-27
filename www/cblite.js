@@ -467,7 +467,8 @@ cblite.prototype.queryAddListener = function(databaseName, query, callbackName, 
 }
 
 /* queryRemoveListener - Removes a query change listener. 
- *
+ * @param databaseName 
+ *          {string} name of the database 
  * @param query 
  *          {string} N1QL query to remove listener
  * @param successCallback 
@@ -476,12 +477,13 @@ cblite.prototype.queryAddListener = function(databaseName, query, callbackName, 
  *          {callback} javascript function to call if error happens in native 
  * 			code 
 */
-cblite.prototype.queryRemoveListener = function(query, successCallback, errorCallback) {
+cblite.prototype.queryRemoveListener = function(dbName, query, successCallback, errorCallback) {
 	if (query == null) {
 		throw ("error: query name can't be null");
 	}
 	let args = {
-		query: query	
+	  dbName : dbName,
+	  query: query
 	};
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'queryRemoveChangeListener', [args]);
 }
