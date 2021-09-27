@@ -114,11 +114,11 @@ dependencies {
 
 ### Run your Ionic project
 
-You should run the app from command line for the first time and later you can directly run from Android Studio  as well.
-
-```bash
-ionic cordova run android
-```
+* You can run the app directly from Android Studio or issue the following command from command line
+ 
+ ```bash
+ ionic cordova run android
+ ```
 
 
 ## Usage
