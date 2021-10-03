@@ -30,6 +30,7 @@ public class LogArgument {
       case "listener":
         this.domain = LogDomain.LISTENER;
       default:
+        this.domain = null;
     }
 
     switch (logLevel) {

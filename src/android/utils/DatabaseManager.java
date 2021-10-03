@@ -585,21 +585,23 @@ public class DatabaseManager {
 
   public ResultCode enableLogging(LogArgument arg) {
 
-    switch (arg.getDomain()){
-      case DATABASE:
-        Database.log.getConsole().setDomains(DATABASE);
-      case NETWORK:
-        Database.log.getConsole().setDomains(DATABASE);
-      case QUERY:
-        Database.log.getConsole().setDomains(DATABASE);
-      case REPLICATOR:
-        Database.log.getConsole().setDomains(DATABASE);
-      default:
-        Database.log.getConsole().setDomains(LogDomain.ALL_DOMAINS);
+    if (arg.getDomain() != null) {
+      switch (arg.getDomain()) {
+        case DATABASE:
+          Database.log.getConsole().setDomains(DATABASE);
+        case NETWORK:
+          Database.log.getConsole().setDomains(DATABASE);
+        case QUERY:
+          Database.log.getConsole().setDomains(DATABASE);
+        case REPLICATOR:
+          Database.log.getConsole().setDomains(DATABASE);
+        default:
+          Database.log.getConsole().setDomains(LogDomain.ALL_DOMAINS);
+      }
+    } else {
+      Database.log.getConsole().setDomains(LogDomain.ALL_DOMAINS);
     }
-
     Database.log.getConsole().setLevel(arg.getLogLevel());
-
     return ResultCode.SUCCESS;
   }
 

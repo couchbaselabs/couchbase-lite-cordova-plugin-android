@@ -868,11 +868,11 @@ cblite.prototype.Domain = {
 };
 
 cblite.prototype.LogLevel = {
-	"DATABASE": "debug",
-	"QUERY": "verbose",
-	"REPLICATOR": "info",
-	"NETWORK": "warning",
-	"LISTENER": "error",
+	"DEBUG": "debug",
+	"VERBOSE": "verbose",
+	"INFO": "info",
+	"WARNING": "warning",
+	"ERROR": "error",
 	"NONE": "none"
 };
 
