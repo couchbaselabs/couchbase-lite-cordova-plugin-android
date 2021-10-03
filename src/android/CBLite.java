@@ -10,11 +10,13 @@ import com.couchbase.cblite.objects.DeleteIndexArgument;
 import com.couchbase.cblite.objects.DocumentArgument;
 import com.couchbase.cblite.objects.FTSIndexArgument;
 import com.couchbase.cblite.objects.ListenerArgument;
+import com.couchbase.cblite.objects.LogArgument;
 import com.couchbase.cblite.objects.QueryArgument;
 import com.couchbase.cblite.objects.ValueIndexArgument;
 import com.couchbase.cblite.utils.DatabaseManager;
 import com.couchbase.lite.BasicAuthenticator;
 import com.couchbase.lite.Database;
+import com.couchbase.lite.Log;
 import com.couchbase.lite.ReplicatorConfiguration;
 import com.couchbase.lite.SessionAuthenticator;
 import com.couchbase.lite.URLEndpoint;
@@ -65,7 +67,7 @@ public class CBLite extends CordovaPlugin {
   private static final String ACTION_CREATE_FTS_INDEX = "createFTSIndex";
   private static final String ACTION_DELETE_INDEX = "deleteIndex";
 
-  private static final String ACTION_ENABLE_LOGGING = "enableLogging";
+  private static final String ACTION_ENABLE_LOGGING = "enableConsoleLogging";
 
 
   private static final String ACTION_REPLICATOR_START = "replicatorStart";
@@ -135,7 +137,7 @@ public class CBLite extends CordovaPlugin {
         return true;
 
       case ACTION_ENABLE_LOGGING:
-        enableLogging(args, callbackContext);
+        enableConsoleLogging(args, callbackContext);
         return true;
 
       case ACTION_QUERY_DATABASE:
@@ -863,20 +865,51 @@ public class CBLite extends CordovaPlugin {
     }
   }
 
-  private void enableLogging(JSONArray args, CallbackContext callbackContext) {
+  public LogArgument parseLogArguments(JSONObject dictionary, CallbackContext callbackContext) {
 
-    DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-    ResultCode result = dbMgr.enableLogging();
+    try {
+      String domain = dictionary.has("domain") ? dictionary.getString("domain") : null;
+      String logLevel = dictionary.has("logLevel") ? dictionary.getString("logLevel") : null;
 
-    PluginResult pluginResult;
-    if (result == ResultCode.SUCCESS) {
-      pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
-    } else {
-      pluginResult = new PluginResult(PluginResult.Status.ERROR, "Error enabling logger for the database.");
+      if (domain == null || logLevel == null) {
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: missing arguments.");
+        pluginResult.setKeepCallback(false);
+        callbackContext.sendPluginResult(pluginResult);
+        return null;
+      }
+
+      LogArgument argument = new LogArgument(domain, logLevel);
+
+      return argument;
+
+    } catch (JSONException e) {
+      e.printStackTrace();
     }
 
-    pluginResult.setKeepCallback(false);
-    callbackContext.sendPluginResult(pluginResult);
+    return null;
+  }
+
+  private void enableConsoleLogging(JSONArray args, CallbackContext callbackContext) {
+
+    DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
+    try {
+      JSONObject params = args.getJSONObject(0);
+      LogArgument logArgs = parseLogArguments(params, callbackContext);
+
+      ResultCode result = dbMgr.enableLogging(logArgs);
+      PluginResult pluginResult;
+      if (result == ResultCode.SUCCESS) {
+        pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
+      } else {
+        pluginResult = new PluginResult(PluginResult.Status.ERROR, "Error enabling logger for the database.");
+      }
+
+      pluginResult.setKeepCallback(false);
+      callbackContext.sendPluginResult(pluginResult);
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+
   }
 
   private QueryArgument parseQueryArguments(JSONObject dictionary, CallbackContext callbackContext) {

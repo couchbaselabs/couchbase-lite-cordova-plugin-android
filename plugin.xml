@@ -23,6 +23,7 @@
         <source-file src="src/android/objects/ValueIndexArgument.java" target-dir="src/com/couchbase/cblite/objects" />
         <source-file src="src/android/objects/DeleteIndexArgument.java" target-dir="src/com/couchbase/cblite/objects" />
         <source-file src="src/android/objects/QueryListenerResource.java" target-dir="src/com/couchbase/cblite/objects" />
+        <source-file src="src/android/objects/LogArgument.java" target-dir="src/com/couchbase/cblite/objects" />
 
         <source-file src="src/android/enums/ResultCode.java" target-dir="src/com/couchbase/cblite/enums" />
 

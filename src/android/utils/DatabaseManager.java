@@ -1,6 +1,7 @@
 package com.couchbase.cblite.utils;
 
 import static com.couchbase.cblite.enums.ResultCode.DATABASE_DOES_NOT_EXIST;
+import static com.couchbase.lite.LogDomain.DATABASE;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -18,6 +19,7 @@ import com.couchbase.cblite.objects.DeleteIndexArgument;
 import com.couchbase.cblite.objects.DocumentArgument;
 import com.couchbase.cblite.objects.FTSIndexArgument;
 import com.couchbase.cblite.objects.ListenerArgument;
+import com.couchbase.cblite.objects.LogArgument;
 import com.couchbase.cblite.objects.QueryArgument;
 import com.couchbase.cblite.objects.QueryListenerResource;
 import com.couchbase.cblite.objects.ValueIndexArgument;
@@ -581,10 +583,22 @@ public class DatabaseManager {
     return ResultCode.SUCCESS;
   }
 
-  public ResultCode enableLogging() {
+  public ResultCode enableLogging(LogArgument arg) {
 
-    Database.log.getConsole().setDomains(LogDomain.ALL_DOMAINS);
-    Database.log.getConsole().setLevel(LogLevel.DEBUG);
+    switch (arg.getDomain()){
+      case DATABASE:
+        Database.log.getConsole().setDomains(DATABASE);
+      case NETWORK:
+        Database.log.getConsole().setDomains(DATABASE);
+      case QUERY:
+        Database.log.getConsole().setDomains(DATABASE);
+      case REPLICATOR:
+        Database.log.getConsole().setDomains(DATABASE);
+      default:
+        Database.log.getConsole().setDomains(LogDomain.ALL_DOMAINS);
+    }
+
+    Database.log.getConsole().setLevel(arg.getLogLevel());
 
     return ResultCode.SUCCESS;
   }
