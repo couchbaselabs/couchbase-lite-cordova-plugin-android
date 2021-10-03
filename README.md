@@ -292,7 +292,10 @@ CBL.dbRemoveListener(dbName, function(blob) { }, function(error) { });
 Logs will show up on native console output
 
 ```
-CBL.enableLogging(function(blob) { }, function(error) { });
+let domain =  CBL.Domain.DATABASE;   //See available option from CBL.Domain object
+let logLevel = CBL.LogLevel.DEBUG;  //See available option from CBL.LogLevel object
+
+CBL.enableConsoleLogging(domain, logLevel, function(result) { }, function(error) { });
 
 ```
 
@@ -307,8 +310,6 @@ CBL.createValueIndex(dbName, indexName, indexes, function(rs) {}, function(err) 
 
 ```
 **Create FTS Index**
-
-Logs will show up on native console output
 
 ```
 let dbName = "{{DATABASE_NAME}}";
