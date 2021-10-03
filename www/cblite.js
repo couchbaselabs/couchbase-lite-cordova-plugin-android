@@ -858,7 +858,27 @@ cblite.prototype.ReplicatorType = {
 	"PULL": "PULL"
 };
 
+cblite.prototype.Domain = {
+	"DATABASE": "database",
+	"QUERY": "query",
+	"REPLICATOR": "replicator",
+	"NETWORK": "network",
+	"LISTENER": "listener",
+	"ALL": "all"
+};
+
+cblite.prototype.LogLevel = {
+	"DATABASE": "debug",
+	"QUERY": "verbose",
+	"REPLICATOR": "info",
+	"NETWORK": "warning",
+	"LISTENER": "error",
+	"NONE": "none"
+};
+
 var cblitePlugin = new cblite();
 Object.freeze(cblite.ReplicatorType);
+Object.freeze(cblite.Domain);
+Object.freeze(cblite.LogLevel);
 
 module.exports = cblitePlugin;
