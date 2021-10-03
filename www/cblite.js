@@ -405,7 +405,7 @@ cblite.prototype.saveBlobFromFileUrl = function (databaseName, contentType, file
  *          {callback} javascript function to call if error happens in native
  *  		code 
 */
-cblite.prototype.enableLogging = function (domain, logLevel, successCallback, errorCallback) {
+cblite.prototype.enableConsoleLogging = function (domain, logLevel, successCallback, errorCallback) {
 	if (domain == null || logLevel == null) {
 		throw ('error: domain can not be null');
 	}
@@ -413,7 +413,7 @@ cblite.prototype.enableLogging = function (domain, logLevel, successCallback, er
 		domain: domain,
 		logLevel: logLevel
 	};
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'enableLogging', [args])
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'enableConsoleLogging', [args])
 };
 
 /* query - N1QL query to execute against the database and return results. 
