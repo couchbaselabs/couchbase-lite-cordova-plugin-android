@@ -15,33 +15,38 @@ The following is list of Couchbase Lite(Android) APIs exported by the plugin.
 
 This is WIP
 
-| API methods | Native Class |
-| :---: | :---: |
-| createOrOpenDatabase (with specified Configuration) | Database |
-| checkDatabase | Database |
-| closeDatabase | Database |
-| copyDatabase | Database |
-| dbAddListener | Database |
-| dbRemoveListener | Database |
-| saveDocument (With JSON OBJECT) | MutableDocument |
-| mutableDocumentSetString | MutableDocument |
-| getDocument | MutableDocument |
-| deleteDocument | MutableDocument |
-| saveBlob  | Database |
-| saveBlobFromEmbeddedResource | Database |
-| saveBlobFromFileURL | Database |
-| getBlob  | Database |
-| enableLogging  | Database |
-| createValueIndex  | Database  |
-| createFTSIndex  | Database |
-| deleteIndex  | Database |
-| query  | Query |
-| replicatorStart | Replicator |
-| replicatorStop | Replicator |
-| replicationAddListener | Replicator |
-| replicationRemoveListener | Replicator |
-| queryAddListener | Query |
-| queryRemoveListener | Query |
+| API methods | Native Class | Description |
+| :---: | :---: | :---: |
+| createOrOpenDatabase (with specified Configuration) | Database | Initializes a Couchbase Lite database with a given name and database options. If the database does not yet exist, it will be created. |
+| DatabaseConfiguration | Database | Helper method to create database configuration object. |
+| checkDatabase | Database | Checks if database exists in the given directory path. |
+| closeDatabase | Database | Close database synchronously. Before closing the database, the active replicators, listeners and live queries will be stopped. |
+| copyDatabase | Database | Copies a canned databaes from the given path to a new database with the given name and the configuration. The new database will be created at the directory specified in the configuration. Without given the database configuration, the default configuration that is equivalent to setting all properties in the configuration to nil will be used.  |
+| dbAddListener | Database | Adds a database change listener. Changes will be posted on the main thread(android)/queue(ios) |
+| dbRemoveListener | Database | Removes existing database change listener. |
+| saveDocument (With JSON OBJECT) | MutableDocument | Saves a document to the database. When write operations are executed concurrently, the last writer will overwrite all other written values. |
+| mutableDocumentSetString | MutableDocument | updates an existing document with a key/value pair property that is of string value. |
+| getDocument | MutableDocument | Gets a Document object with the given ID. |
+| deleteDocument | MutableDocument | Delete a document in the database. When write operations are executed concurrently, the last writer will overwrite all other written values.|
+| saveBlob | Database | Saves blob on the database. NOTE: successCallback returns metadata that must be used to retreive the blob using the getBlob function.  It's very important that you keep a reference to the metadata if you need to retreive the blob. |
+| saveBlobFromEmbeddedResource | Database | Saves Blob object from a file that is embedded in the Native project (AssetCatalog for iOS and Resource folder for Android).  NOTE: successCallback returns metadata that must be used  to retreive the blob using the getBlob function.  It's very important that you keep a reference to the metadata if you need to retreive the blob.  This is a helper function for javascript developers with no Native equivilant call |
+| saveBlobFromFileURL | Database | Saves Blob object from a file that is saved on the device in a folder accessible by the application. This might require application configuration changes to allow application to read files stored on the device.|
+| getBlob  | Database | Get a Blob object for the given metadata. |
+| enableConsoleLogging  | Database | Log allows to configure console logging. Logs are printed on native IDE. Very useful for debugging. |
+| createValueIndex  | Database |
+| createFTSIndex  | Database | Create a full-text search index for full-text search query with the match operator. |
+| deleteIndex  | Database | delete an index |
+| query  | Query | N1QL query to execute against the database and return results. |
+| queryAddListener | Query | Adds a query change listener. Changes will be posted on the main thread(android)/queue(ios). |
+| queryRemoveListener | Query | Removes a query change listener. |
+| ReplicatorConfiguration | Replicator | Helper method to create replicator configuration object. |
+| replicatorStart | Replicator | Initializes a replicator with the given configuration. The replicator is used for  replicating document changes between a local database and a target database. The replicator can be bidirectional or either push or pull. The replicator can also be one-short or continuous. The replicator runs asynchronously, so observe the status property to be notified of progress. |
+| replicatorStop | Replicator | Stops a running replicator. This method returns immediately; when the replicator actually stops, the replicator will change its status’s activity level to .stopped and the replicator change notification will be notified accordingly. |
+| BasicAuthenticator | BasicAuthentication  | The BasicAuthentiatior is an authenticator that will authenticate using HTTP Basic auth with the given username and password. This should only be used over an SSL/TLS connection, as otherwise it's very easy for anyone sniffing network traffic to read the password. |
+| SessionAuthenticator | SessionAuthentication | The SessionAuthenticatior is an authenticator that will authenticate by using the session ID of the session created by a Sync Gateway |
+| replicationAddListener | Replicator | Adds a replication change listener. Changes will be posted on the main thread(android)/queue(ios). |
+| replicationRemoveListener | Replicator | Removes the replication change listener. |
+
 
 
 ## Getting Started
@@ -138,7 +143,7 @@ declare var CBL: any;
 ...
 ```
 
-**Create Or Open Database**
+**Create OR Open Database**
 ```
 const config = {
     encryptionKey: "{{ENCRYPTION_KEY}}",
@@ -178,7 +183,7 @@ const newConfig = {
     directory: "{{DIRECTORY}}"
 };
 
-CBL.closeDatabase(dbName, config, newDbName, newConfig, function(rs) { }, function(error) { });
+CBL.copyDatabase(dbName, config, newDbName, newConfig, function(rs) { }, function(error) { });
 
 ```
 
