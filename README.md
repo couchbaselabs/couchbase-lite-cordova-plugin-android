@@ -16,7 +16,7 @@ The following is list of Couchbase Lite(Android) APIs exported by the plugin.
 This is WIP
 
 | API methods | Native Class | Description |
-| :---: | :---: | :---: |
+| :---: | :---: | :--- |
 | createOrOpenDatabase (with specified Configuration) | Database | Initializes a Couchbase Lite database with a given name and database options. If the database does not yet exist, it will be created. |
 | DatabaseConfiguration | Database | Helper method to create database configuration object. |
 | checkDatabase | Database | Checks if database exists in the given directory path. |
