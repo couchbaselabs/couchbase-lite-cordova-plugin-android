@@ -11,9 +11,8 @@ The Cordova plugin example exports a subset of native Couchbase Lite APIs and ma
 ![](https://i0.wp.com/blog.couchbase.com/wp-content/uploads/2018/10/JS-stuff.jpg?w=900)
 
 ## Exported APIs
-The following is list of Couchbase Lite(Android) APIs exported by the plugin. 
+The following is list of APIs (& features) exported by the plugin. 
 
-This is WIP
 
 | API methods | Native Class | Description |
 | :---: | :---: | :--- |
@@ -53,7 +52,12 @@ This is WIP
 
 ### Integrating the Plugin into your Ionic App
 
-The plugin can be integrated within cordova or ionic app projects. 
+The Cordova plugin can be integrated within cordova or ionic app projects. 
+
+**NOTE** that for Ionic now recommends a [capacitor](https://capacitorjs.com) for native access within Ionic apps. However, a cordova plugin can also be used and the instructions here is to be used as a guide. You may also migrate the plugin to capacitor and submit as a contribution!
+
+For enterprise apps, there is a [Ionic plugin](https://ionic.io/integrations/couchbase-lite) for couchbase Lite.
+
 
 The step-by-step instructions below illustrates how you can integrate and use the plugin within a blank Angular Ionic Project for Android platform. You will do something similar when building your own app. 
 
@@ -423,7 +427,7 @@ CBL.createOrOpenDatabase('Database', { 'encryptionKey': '', 'directory' : 'datab
 
 ## Updates to Plugin
 
-If you update the plugin such as adding a new API, don't forget to  remove the plugin and re-add it to the app
+If you update the plugin such as adding a new API, don't forget to  remove the plugin and follow instructions outlined above to add it to the app
 ```
 ionic cordova plugin rm cordova.plugin.couchbaselite
 ```
