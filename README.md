@@ -24,7 +24,7 @@ The following is list of APIs (& features) exported by the plugin.
 | dbAddListener | Database | Adds a database change listener. Changes will be posted on the main thread(android)/queue(ios) |
 | dbRemoveListener | Database | Removes existing database change listener. |
 | saveDocument (With JSON OBJECT) | MutableDocument | Saves a document to the database. When write operations are executed concurrently, the last writer will overwrite all other written values. |
-| mutableDocumentSetString | MutableDocument | updates an existing document with a key/value pair property that is of string value. |
+| mutableDocumentSetString | MutableDocument | Updates an existing document with a key/value pair property that is of string value. |
 | getDocument | MutableDocument | Gets a Document object with the given ID. |
 | deleteDocument | MutableDocument | Delete a document in the database. When write operations are executed concurrently, the last writer will overwrite all other written values.|
 | saveBlob | Database | Saves blob on the database. NOTE: successCallback returns metadata that must be used to retreive the blob using the getBlob function.  It's very important that you keep a reference to the metadata if you need to retreive the blob. |
