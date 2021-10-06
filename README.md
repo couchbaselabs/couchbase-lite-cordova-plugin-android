@@ -32,10 +32,10 @@ This is WIP
 | saveBlobFromEmbeddedResource | Database | Saves Blob object from a file that is embedded in the Native project (AssetCatalog for iOS and Resource folder for Android).  NOTE: successCallback returns metadata that must be used  to retreive the blob using the getBlob function.  It's very important that you keep a reference to the metadata if you need to retreive the blob.  This is a helper function for javascript developers with no Native equivilant call |
 | saveBlobFromFileURL | Database | Saves Blob object from a file that is saved on the device in a folder accessible by the application. This might require application configuration changes to allow application to read files stored on the device.|
 | getBlob  | Database | Get a Blob object for the given metadata. |
-| enableConsoleLogging  | Database | Log allows to configure console logging. Logs are printed on native IDE. Very useful for debugging. |
-| createValueIndex  | Database |
-| createFTSIndex  | Database | Create a full-text search index for full-text search query with the match operator. |
-| deleteIndex  | Database | delete an index |
+| enableConsoleLogging  | Database | Allows to configure console logging. Logs are printed on native IDE. Very useful for debugging. |
+| createValueIndex  | Database | Creates a value index for regular queries. |
+| createFTSIndex  | Database | Creates a full-text search index for full-text search query with the match operator. |
+| deleteIndex  | Database | Deletes an index |
 | query  | Query | N1QL query to execute against the database and return results. |
 | queryAddListener | Query | Adds a query change listener. Changes will be posted on the main thread(android)/queue(ios). |
 | queryRemoveListener | Query | Removes a query change listener. |
