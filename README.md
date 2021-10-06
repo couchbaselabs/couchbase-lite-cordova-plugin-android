@@ -5,7 +5,9 @@ In order to use Couchbase Lite as embedded database within your Cordova-based ap
 
 The Cordova plugin example exports a subset of native Couchbase Lite APIs and makes it available to Cordova apps. This is intended to be used as a reference. You can extend this plugin to expose other relevant APIs per [plugin development guide](https://cordova.apache.org/docs/en/10.x/guide/platforms/android/plugin.html) 
 
-*NOTE*: The plugin **does not** bundle Couchbase Lite native framework. You will include Couchbase Lite library when building your Cordova or Ionic app. The Getting Started instructions below describe the same.
+**NOTE**: The plugin **does not** bundle Couchbase Lite native framework. You will include Couchbase Lite library when building your Cordova or Ionic app. The Getting Started instructions below describes the same.
+
+**LICENSE**: The source code for the plugin is Apache-licensed, as specified in LICENSE. However, the usage of Couchbase Lite will be guided by the terms and conditions specified in Couchbase's Enterprise or Community License agreements.
 
 
 ![](https://i0.wp.com/blog.couchbase.com/wp-content/uploads/2018/10/JS-stuff.jpg?w=900)
