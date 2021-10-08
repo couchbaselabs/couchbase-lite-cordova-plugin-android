@@ -58,9 +58,15 @@ cblite.prototype.closeDatabase = function (dbName, successCallback, errorCallbac
  * 			code 
 */
 cblite.prototype.copyDatabase = function (fromPath, dbName, newConfig, successCallback, errorCallback) {
+	
+	if (newConfig == null)
+	{
+		newConfig = new Object();
+	}
+	newConfig.dbName = dbName;
+
 	let defaultConfig = {
 		fromPath: fromPath,
-		dbName: dbName,
 		newConfig: newConfig
 	};
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'copyDatabase', [defaultConfig]);
