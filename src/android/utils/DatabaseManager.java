@@ -763,7 +763,7 @@ public class DatabaseManager {
     return ResultCode.ERROR;
   }
 
-  public ResultCode replicationAddChangeListener(ListenerArgument arguments, CordovaWebView webView) {
+  public ResultCode replicatorAddChangeListener(ListenerArgument arguments, CordovaWebView webView) {
 
     if (!databases.isEmpty()) {
       String dbName = arguments.getDatabaseName();
@@ -833,7 +833,7 @@ public class DatabaseManager {
     return ResultCode.SUCCESS;
   }
 
-  public ResultCode replicationRemoveChangeListener(ListenerArgument listenerArgument) {
+  public ResultCode replicatorRemoveChangeListener(ListenerArgument listenerArgument) {
 
     String database = listenerArgument.getDatabaseName();
     if (!databases.containsKey(database)) {

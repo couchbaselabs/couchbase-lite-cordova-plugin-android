@@ -72,8 +72,8 @@ public class CBLite extends CordovaPlugin {
 
   private static final String ACTION_REPLICATOR_START = "replicatorStart";
   private static final String ACTION_REPLICATOR_STOP = "replicatorStop";
-  private static final String ACTION_REPLICATION_ADD_LISTENER = "replicationAddChangeListener";
-  private static final String ACTION_REPLICATION_REMOVE_LISTENER = "replicationRemoveChangeListener";
+  private static final String ACTION_REPLICATOR_ADD_LISTENER = "replicatorAddChangeListener";
+  private static final String ACTION_REPLICATOR_REMOVE_LISTENER = "replicatorRemoveChangeListener";
 
   private static final String QUERY_ADD_CHANGE_LISTENER = "queryAddChangeListener";
   private static final String QUERY_REMOVE_CHANGE_LISTENER = "queryRemoveChangeListener";
@@ -174,12 +174,12 @@ public class CBLite extends CordovaPlugin {
         replicatorStop(args, callbackContext);
         return true;
 
-      case ACTION_REPLICATION_ADD_LISTENER:
-        replicationAddListener(args, callbackContext);
+      case ACTION_REPLICATOR_ADD_LISTENER:
+        replicatorAddListener(args, callbackContext);
         return true;
 
-      case ACTION_REPLICATION_REMOVE_LISTENER:
-        replicationRemoveListener(args, callbackContext);
+      case ACTION_REPLICATOR_REMOVE_LISTENER:
+        replicatorRemoveListener(args, callbackContext);
         return true;
 
       case QUERY_ADD_CHANGE_LISTENER:
@@ -1276,7 +1276,7 @@ public class CBLite extends CordovaPlugin {
 
   }
 
-  private void replicationAddListener(JSONArray args, CallbackContext callbackContext) {
+  private void replicatorAddListener(JSONArray args, CallbackContext callbackContext) {
     try {
 
       JSONObject params = args.getJSONObject(0);
@@ -1294,7 +1294,7 @@ public class CBLite extends CordovaPlugin {
       DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
 
       CordovaWebView cdv = this.webView;
-      ResultCode result = dbMgr.replicationAddChangeListener(arguments, cdv);
+      ResultCode result = dbMgr.replicatorAddChangeListener(arguments, cdv);
 
       if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
         pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database does not exist.");
@@ -1321,7 +1321,7 @@ public class CBLite extends CordovaPlugin {
 
   }
 
-  private void replicationRemoveListener(JSONArray args, CallbackContext callbackContext) {
+  private void replicatorRemoveListener(JSONArray args, CallbackContext callbackContext) {
 
     try {
 
@@ -1338,7 +1338,7 @@ public class CBLite extends CordovaPlugin {
       }
 
       DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-      ResultCode result = dbMgr.replicationRemoveChangeListener(arguments);
+      ResultCode result = dbMgr.replicatorRemoveChangeListener(arguments);
 
       if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
         pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database does not exist.");
@@ -1479,7 +1479,7 @@ public class CBLite extends CordovaPlugin {
         ResultCode resultCode = dbMgr.createOrOpenDatabase(dbArgs);
 
         if (resultCode == ResultCode.ERROR) {
-          PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: couldn't open database for replication.");
+          PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: couldn't open database for replicator.");
           pluginResult.setKeepCallback(false);
           callbackContext.sendPluginResult(pluginResult);
           return null;
