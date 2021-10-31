@@ -41,12 +41,13 @@ The following is list of APIs (& features) exported by the plugin.
 | queryAddListener | Query | Adds a query change listener. Changes will be posted on the main thread(android)/queue(ios). |
 | queryRemoveListener | Query | Removes a query change listener. |
 | ReplicatorConfiguration | Replicator | Helper method to create replicator configuration object. |
-| replicatorStart | Replicator | Initializes a replicator with the given configuration. The replicator is used for  replicating document changes between a local database and a target database. The replicator can be bidirectional or either push or pull. The replicator can also be one-short or continuous. The replicator runs asynchronously, so observe the status property to be notified of progress. |
-| replicatorStop | Replicator | Stops a running replicator. This method returns immediately; when the replicator actually stops, the replicator will change its status’s activity level to stopped and the replicator change notification will be notified accordingly. |
+| createReplicator | Replicator | Helper method to create replicator configuration object. |
+| start | Replicator | Initializes a replicator with the given configuration. The replicator is used for  replicating document changes between a local database and a target database. The replicator can be bidirectional or either push or pull. The replicator can also be one-short or continuous. The replicator runs asynchronously, so observe the status property to be notified of progress. |
+| stop | Replicator | Stops a running replicator. This method returns immediately; when the replicator actually stops, the replicator will change its status’s activity level to stopped and the replicator change notification will be notified accordingly. |
 | BasicAuthenticator | BasicAuthentication  | The BasicAuthentiatior is an authenticator that will authenticate using HTTP Basic auth with the given username and password. This should only be used over an SSL/TLS connection, as otherwise it's very easy for anyone sniffing network traffic to read the password. |
 | SessionAuthenticator | SessionAuthentication | The SessionAuthenticatior is an authenticator that will authenticate by using the session ID of the session created by a Sync Gateway |
-| replicationAddListener | Replicator | Adds a replication change listener. Changes will be posted on the main thread(android)/queue(ios). |
-| replicationRemoveListener | Replicator | Removes the replication change listener. |
+| addChangeListener | Replicator | Adds a replication change listener. Changes will be posted on the main thread(android)/queue(ios). |
+| removeChangeListener | Replicator | Removes the replication change listener. |
 
 
 
