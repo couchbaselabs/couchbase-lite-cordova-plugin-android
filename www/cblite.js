@@ -6,7 +6,7 @@ var PLUGIN_NAME = 'CBLite';
 */
 var cblite = function () { }
 
-/* The fromBasicAuthentiation is an authenticator that will authenticate using
+/* The fromBasicAuthentication is an authenticator that will authenticate using
  * HTTP Basic auth with the given username and password. This should only be 
  * used over an SSL/TLS connection, as otherwise it's very easy for anyone
  * sniffing network traffic to read the password.  
@@ -14,7 +14,7 @@ var cblite = function () { }
  * @param username
  *          {string} user to authenticate with - used with BasicAuthentication 
  * @param password
- *          {string} password to autheticate with - used with BasicAuthentiation 
+ *          {string} password to authenticate with - used with BasicAuthentication
 */
 cblite.prototype.BasicAuthenticator = function(username, password) {
     var ba = new Object();
@@ -38,7 +38,7 @@ cblite.prototype.closeDatabase = function (dbName, successCallback, errorCallbac
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'closeDatabase', [dbName]);
 };
 
-/* copyDatabase - Copies a canned databaes from the given path to a new 
+/* copyDatabase - Copies a canned database from the given path to a new 
  * database with the given name and the configuration. The new database will be
  * created at the directory specified in the configuration. Without given the
  * database configuration, the default configuration that is equivalent to
@@ -58,15 +58,9 @@ cblite.prototype.closeDatabase = function (dbName, successCallback, errorCallbac
  * 			code 
 */
 cblite.prototype.copyDatabase = function (fromPath, dbName, newConfig, successCallback, errorCallback) {
-	
-	if (newConfig == null)
-	{
-		newConfig = new Object();
-	}
-	newConfig.dbName = dbName;
-
 	let defaultConfig = {
 		fromPath: fromPath,
+		dbName: dbName,
 		newConfig: newConfig
 	};
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'copyDatabase', [defaultConfig]);
@@ -277,7 +271,7 @@ cblite.prototype.deleteDatabase = function(dbName, successCallback, errorCallbac
  * @param id 
  *          {string} id/key of the document to remove from the database 
  * @param dbName 
- *          {string} name of the database to retreive document from 
+ *          {string} name of the database to retrieve document from 
  * @param successCallback 
  *          {callback} javascript function to call if native code is successful 
  * @param errorCallback 
@@ -355,7 +349,7 @@ cblite.prototype.enableConsoleLogging = function (domain, logLevel, successCallb
 /* getBlob - get a Blob object for the given metadata. 
  *
  * @param dbName 
- *          {string} name of the database to retreive document from 
+ *          {string} name of the database to retrieve document from 
  * @param blobMetadata
  *          {string} string of JSON metadata used to retrieve blob 
  * @param successCallback 
@@ -366,7 +360,7 @@ cblite.prototype.enableConsoleLogging = function (domain, logLevel, successCallb
 */
 cblite.prototype.getBlob = function(dbName, blobMetadata, successCallback, errorCallback){
 	if (dbName == null) { 
-		throw "error: dbName must be passed in to retreive blob";
+		throw "error: dbName must be passed in to retrieve blob";
 	} else if (blobMetadata == null) { 
 		throw "error:  blobMetadata must be passed in to retrieve blob";
 	} else {
@@ -383,7 +377,7 @@ cblite.prototype.getBlob = function(dbName, blobMetadata, successCallback, error
  * @param id 
  *          {string} id/key of the document to retrieve from the database 
  * @param dbName 
- *          {string} name of the database to retreive document from 
+ *          {string} name of the database to retrieve document from 
  * @param successCallback 
  *          {callback} javascript function to call if native code is successful 
  * @param errorCallback 
@@ -452,10 +446,10 @@ cblite.prototype.getDocumentInfo = function (id, dbName) {
 };
 
 /* getEmbeddedResourcePath - get's native file system path to embedded resource - helper method, no 
- * cblite mapping to native api, more convience to Cordova developers 
+ * cblite mapping to native api, more convince to Cordova developers 
  *
  * @param resourceName 
- *          {string} name of the embeded resource where the database is stored 
+ *          {string} name of the embedded resource where the database is stored 
  * @param successCallback 
  *          {callback} javascript function to call if native code is successful 
  * @param errorCallback 
@@ -613,38 +607,130 @@ cblite.prototype.queryRemoveListener = function(dbName, query, successCallback, 
 	exec(successCallback, errorCallback, PLUGIN_NAME, 'queryRemoveChangeListener', [args]);
 };
 
-/* replicationAddListener - Adds a replication change listener. Changes will be 
- * posted on the main thread(android)/queue(ios).
+/** Replicator - A replicator for replicating document changes between a local database and a target database. 
+ * The replicator can be bidirectional or either push or pull. The replicator can also be one-short or continuous. The replicator 
+ * runs asynchronously, so observe the status property to be notified of progress.
  *
- * @param databaseName 
- *          {string} name of the database 
- * @param callbackName 
- *          {callback} javascript function to call when changes are posted.  
+ * @param config 
+ *          {ReplicatorConfiguration} The configuration  
  * @param successCallback 
  *          {callback} javascript function to call if native code is successful 
  * @param errorCallback 
- *          {callback} javascript function to call if error happens in native
- *  		code 
+ *          {callback} javascript function to call if error happens in native code 
 */
-cblite.prototype.replicatorAddListener = function(databaseName, callbackName, successCallback, errorCallback) {
-	if (databaseName == null || callbackName == null) {
-		throw ("error: database name and callbackName can't be null");
+cblite.prototype.Replicator = function(config){
+	this.replicatorConfig = config;
+
+	/** createReplicator - creates a replicator and returns the Hash Code that can be used i
+	 * the start, stop, addChangeListener, and removeChangeListener functions.  This hash code
+	 * is required in order to support multiple replicators on the same database but with different
+	 * configuration options.  The hash code is returned in the successCallback as a JSON string.
+	 *
+	 * @param successCallback 
+	 *          {callback} javascript function to call if native code is successful 
+	 * @param errorCallback 
+	 *          {callback} javascript function to call if error happens in native
+	 *  		code 
+	*/
+	this.createReplicator = function(successCallback, errorCallback){
+		exec(successCallback, errorCallback, PLUGIN_NAME, 'replicator', [this.replicatorConfig]);
 	}
-	let args = {
-		dbName: databaseName,	
-		jsCallback: callbackName
+
+	/** addChangeListener - Adds a replication change listener. Changes will be 
+ 	 * posted on the main thread(android)/queue(ios).
+	 *
+	 * @param replicatorHash 
+	 *          {replicatorHash} hash code returned from createReplicator function 
+	 * @param callbackName 
+	 *          {callback} javascript function to call when changes are posted.  
+	 * @param successCallback 
+	 *          {callback} javascript function to call if native code is successful 
+	 * @param errorCallback 
+	 *          {callback} javascript function to call if error happens in native
+	 *  		code 
+	*/
+	this.addChangeListener = function(replicatorHash, callbackName, successCallback, errorCallback) {
+		if (replicatorHash == null || callbackName == null) {
+			throw ("error: hash and callbackName can't be null");
+		}
+		let args = {
+			hash: replicatorHash, 
+			jsCallback: callbackName
+		};
+		exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorAddChangeListener', [args]);
 	};
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorAddChangeListener', [args]);
+
+	/** removeChangeListener - removes the replication change listener. 
+	 *
+	 * @param replicatorHash 
+	 *          {replicatorHash} hash code returned from createReplicator function
+	 * @param successCallback 
+	 *          {callback} javascript function to call if native code is successful 
+	 * @param errorCallback 
+	 *          {callback} javascript function to call if error happens in native
+	 *  		code 
+	*/
+	this.removeChangeListener = function(replicatorHash, successCallback, errorCallback) {
+		if (replicatorHash == null) {
+			throw ("error: hash can't be null");
+		}
+		let args = {
+			hash: replicatorHash
+		};
+		exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorRemoveChangeListener', [args]);
+	};
+
+	/** start - Starts the replicator. This method returns immediately; the replicator runs asynchronously and will report its 
+	* progress through the replicator change notification.
+	*
+ 	* @param replicatorHash 
+	*          {replicatorHash} hash code returned from createReplicator function
+ 	* @param successCallback 
+ 	*          {callback} javascript function to call if native code is successful 
+ 	* @param errorCallback 
+ 	*          {callback} javascript function to call if error happens in native code 
+	*/
+	this.start = function(replicatorHash, successCallback, errorCallback) {
+		if (replicatorHash == null) {
+			throw ("error: hash can't be null");
+		}
+		let args = {
+			hash: replicatorHash
+		};
+		exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorStart', [args]);
+	};
+
+	/** stop - Stops a running replicator. This method returns immediately; 
+ 	* when the replicator actually stops, the replicator will change its status’s 
+ 	* activity level to .stopped and the replicator change notification will be 
+ 	* notified accordingly.
+ 	* @param replicatorHash 
+	*          {replicatorHash} hash code returned from createReplicator function	
+ 	* @param successCallback 
+ 	*          {callback} javascript function to call if native code is successful 
+ 	* @param errorCallback 
+ 	*          {callback} javascript function to call if error happens in native code 
+	*/
+	this.stop = function(replicatorHash, successCallback, errorCallback) {
+		if (replicatorHash == null) {
+			throw ("error: hash can't be null");
+		}
+		let args = {
+			hash: replicatorHash
+		};
+		exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorStop', [args]);
+	};
+  
+  return this;
 };
 
-/** 
+/**  
  *  Replicator configuration. 
- * 
  * @param databaseName
  *      {string} The local database name to replicate with the 
  * 		replication target. 
  * @param targetUrl
- *      {string} url of the eplication target to replicate with. 
+ *      {string} url of the replication target to replicate with. 
 */
 cblite.prototype.ReplicatorConfiguration = function (databaseName, targetUrl){
 	var obj = new Object();
@@ -666,24 +752,71 @@ cblite.prototype.ReplicatorConfiguration = function (databaseName, targetUrl){
 	return obj;
 };
 
-/* replicatorRemoveListener - removes the replication change listener. 
+/* @deprecated - DO NOT USE 
+ * replicatorStart - Initializes a replicator with the given configuration.  The
+	* replicator is used for  replicating document changes between a local database and 
+	* a target database. The replicator can be bidirectional or either push or pull. The
+* replicator can also be one-short or continuous. The replicator runs asynchronously, 
+* so observe the status property to be notified of progress.
+*
+* @param config 
+*          {ReplicatorConfiguration} The configuration 
+* @param successCallback 
+*          {callback} javascript function to call if native code is successful 
+* @param errorCallback 
+*          {callback} javascript function to call if error happens in native code 
+*/
+cblite.prototype.Replicator.replicatorStart = function(config, successCallback, errorCallback) {
+	if (config == null) {
+		throw ("error: config can't be null");
+	}
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorStart', [config]);
+};
+
+/* @deprecated - DO NOT USE 
+ * replicationAddListener - Adds a replication change listener. Changes will be 
+ * posted on the main thread(android)/queue(ios).
  *
- * @param databaseName 
- *          {string} name of the database 
+ * @param config 
+ *          {ReplicatorConfiguration} The configuration 
+ * @param callbackName 
+ *          {callback} javascript function to call when changes are posted.  
  * @param successCallback 
  *          {callback} javascript function to call if native code is successful 
  * @param errorCallback 
  *          {callback} javascript function to call if error happens in native
  *  		code 
 */
-cblite.prototype.replicatorRemoveListener = function(databaseName, successCallback, errorCallback) {
+cblite.prototype.replicatorAddListener = function(config, callbackName, successCallback, errorCallback) {
+	if (config == null || callbackName == null) {
+		throw ("error: config and callbackName can't be null");
+	}
+	let args = {
+		config: config, 
+		jsCallback: callbackName
+	};
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorAddChangeListener', [args]);
+};
+
+/* @deprecated - DO NOT USE 
+ * replicatorRemoveListener - removes the replication change listener. 
+ *
+ * @param config 
+ *          {ReplicatorConfiguration} The configuration 
+ * @param successCallback 
+ *          {callback} javascript function to call if native code is successful 
+ * @param errorCallback 
+ *          {callback} javascript function to call if error happens in native
+ *  		code 
+*/
+cblite.prototype.replicatorRemoveListener = function(config, successCallback, errorCallback) {
 	if (databaseName == null) {
-		throw ("error: database name can't be null");
+		throw ("error: config can't be null");
 	}
 	let args = {
 		dbName: databaseName	
 	};
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorRemoveChangeListener', [args]);
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorRemoveChangeListener', [config]);
 };
 
 cblite.prototype.ReplicatorType = { 
@@ -692,11 +825,11 @@ cblite.prototype.ReplicatorType = {
 	"PULL": "PULL"
 };
 
-/* replicatorStart - Initializes a replicator with the given configuration.  The
- * replicator is used for  replicating document changes between a local database and 
- * a target database. The replicator can be bidirectional or either push or pull. The
- * replicator can also be one-short or continuous. The replicator runs asynchronously, 
- * so observe the status property to be notified of progress.
+/* @deprecated - DO NOT USE 
+ * replicatorStop - Stops a running replicator. This method returns immediately; 
+ * when the replicator actually stops, the replicator will change its status’s 
+ * activity level to .stopped and the replicator change notification will be 
+ * notified accordingly.
  *
  * @param config 
  *          {ReplicatorConfiguration} The configuration 
@@ -705,42 +838,20 @@ cblite.prototype.ReplicatorType = {
  * @param errorCallback 
  *          {callback} javascript function to call if error happens in native code 
 */
-cblite.prototype.replicatorStart = function(config, successCallback, errorCallback) {
+cblite.prototype.replicatorStop = function(config, successCallback, errorCallback) {
 	if (config == null) {
 		throw ("error: config can't be null");
 	}
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorStart', [config]);
-};
-
-/* replicatorStop - Stops a running replicator. This method returns immediately; 
- * when the replicator actually stops, the replicator will change its status’s 
- * activity level to .stopped and the replicator change notification will be 
- * notified accordingly.
- *
- * @param databaseName 
- *          {string} name of the database 
- * @param successCallback 
- *          {callback} javascript function to call if native code is successful 
- * @param errorCallback 
- *          {callback} javascript function to call if error happens in native code 
-*/
-cblite.prototype.replicatorStop = function(databaseName, successCallback, errorCallback) {
-	if (databaseName == null) {
-		throw ("error: database name can't be null");
-	}
-	let args = {
-		dbName: databaseName	
-	};
-	exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorStop', [args]);
+	exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorStop', [config]);
 };
 
 /* saveBlob - Saves blob on the database.  NOTE: 
- * successCallback returns metadata that must be used to retreive the blob
+ * successCallback returns metadata that must be used to retrieve the blob
  * using the getBlob function.  It's very important that you keep a reference
- * to the metadata if you need to retreive the blob. 
+ * to the metadata if you need to retrieve the blob. 
  *
  * @param databaseName 
- *          {string} name of the database to retreive document from 
+ *          {string} name of the database to retrieve document from 
  * @param contentType 
  *          {string} type of blob data you are storing  
  * @param blobData
@@ -773,13 +884,13 @@ cblite.prototype.saveBlob = function (databaseName, contentType, blobData, succe
 /* saveBlobFromEmbeddedResource - Saves Blob object 
  * from a file that is embedded in the Native project (AssetCatalog for iOS and
  * Resource folder for Android).  NOTE: successCallback returns metadata that
- * must be used  to retreive the blob using the getBlob function.  It's very
- * important that you keep a reference to the metadata if you need to retreive
+ * must be used  to retrieve the blob using the getBlob function.  It's very
+ * important that you keep a reference to the metadata if you need to retrieve
  * the blob.  This is a helper function for javascript developers with no
- * Native equivilant call. 
+ * Native equivalent call. 
  *
  * @param databaseName 
- *          {string} name of the database to retreive document from 
+ *          {string} name of the database to retrieve document from 
  * @param contentType 
  *          {string} type of blob data you are storing 
  * @param resourceName 
@@ -813,10 +924,10 @@ cblite.prototype.saveBlobFromEmbeddedResource = function (databaseName, contentT
  * This might require application configuration changes to allow application to
  * read files stored on the device.
  * 
- * NOTE: successCallback returns metadata that must be used to retreive the
+ * NOTE: successCallback returns metadata that must be used to retrieve the
  * blob using the getBlob function.  It's very important that you keep a
- * reference to the metadata if you need to retreive the blob.  This is a
- * helper function for javascript developers with no Native equivilant call. 
+ * reference to the metadata if you need to retrieve the blob.  This is a
+ * helper function for javascript developers with no Native equivalent call. 
  *
  * @param databaseName 
  *          {string} name of the database to update document
@@ -858,7 +969,7 @@ cblite.prototype.saveBlobFromFileUrl = function (databaseName, contentType, file
  * @param document 
  *          {string} string of JSON to save/update in the database
  * @param dbName 
- *          {string} name of the database to retreive document from 
+ *          {string} name of the database to retrieve document from 
  * @param successCallback 
  *          {callback} javascript function to call if native code is successful 
  * @param errorCallback 
@@ -883,7 +994,7 @@ cblite.prototype.saveDocument = function (id, document, dbName, successCallback,
  *          {string} Session ID of the session created by a Sync Gateway 
  * @param cookieName
  *          {string} cookie name that the session ID value will be set to when 
- *          communicating the * Sync Gateaway. 
+ *          communicating the * Sync Gateway. 
 */
 cblite.prototype.SessionAuthenticator = function(cookieName, sessionId){
 	var sa = new Object();
@@ -893,29 +1004,7 @@ cblite.prototype.SessionAuthenticator = function(cookieName, sessionId){
 	return sa;
 };
 
-cblite.prototype.ReplicatorType = { 
-	"PUSH_AND_PULL": "PUSHANDPULL", 
-	"PUSH": "PUSH", 
-	"PULL": "PULL"
-};
 
-cblite.prototype.Domain = {
-	"DATABASE": "database",
-	"QUERY": "query",
-	"REPLICATOR": "replicator",
-	"NETWORK": "network",
-	"LISTENER": "listener",
-	"ALL": "all"
-};
-
-cblite.prototype.LogLevel = {
-	"DEBUG": "debug",
-	"VERBOSE": "verbose",
-	"INFO": "info",
-	"WARNING": "warning",
-	"ERROR": "error",
-	"NONE": "none"
-};
 
 var cblitePlugin = new cblite();
 Object.freeze(cblite.ReplicatorType);

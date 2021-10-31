@@ -1,6 +1,7 @@
 package com.couchbase.cblite.utils;
 
 import static com.couchbase.cblite.enums.ResultCode.DATABASE_DOES_NOT_EXIST;
+import static com.couchbase.cblite.enums.ResultCode.REPLICATOR_DOES_NOT_EXIST;
 import static com.couchbase.lite.LogDomain.DATABASE;
 
 import android.content.Context;
@@ -22,6 +23,8 @@ import com.couchbase.cblite.objects.ListenerArgument;
 import com.couchbase.cblite.objects.LogArgument;
 import com.couchbase.cblite.objects.QueryArgument;
 import com.couchbase.cblite.objects.QueryListenerResource;
+import com.couchbase.cblite.objects.ReplicatorConfigHash;
+import com.couchbase.cblite.objects.ReplicatorResource;
 import com.couchbase.cblite.objects.ValueIndexArgument;
 import com.couchbase.lite.Blob;
 import com.couchbase.lite.CouchbaseLite;
@@ -72,6 +75,8 @@ public class DatabaseManager {
   private static Database database;
   private static DatabaseManager instance = null;
 
+  private static Map<Integer, ReplicatorResource> _replicatorResources;
+
 
   public DatabaseManager() {
   }
@@ -81,6 +86,7 @@ public class DatabaseManager {
       instance = new DatabaseManager();
       databases = new HashMap<>();
       queryResources = new HashMap<>();
+      _replicatorResources = new HashMap<>();
       CouchbaseLite.init(c);
     }
 
@@ -731,56 +737,40 @@ public class DatabaseManager {
     return ResultCode.ERROR;
   }
 
-  public ResultCode replicatorStart(ReplicatorConfiguration config) {
-    if (databases.isEmpty()) {
-      return DATABASE_DOES_NOT_EXIST;
+  public ResultCode replicatorStart(Integer configHash) {
+    if (_replicatorResources.isEmpty() || _replicatorResources.get(configHash) == null) {
+      return ResultCode.REPLICATOR_DOES_NOT_EXIST;
     } else {
-      String dbName = config.getDatabase().getName();
-      DatabaseResource dbr = databases.get(dbName);
-      dbr.setReplicator(new Replicator(config));
-      dbr.getReplicator().start();
-
+      ReplicatorResource replicatorResource = _replicatorResources.get(configHash);
+      replicatorResource.getReplicator().start();
       return ResultCode.SUCCESS;
     }
   }
 
-  public ResultCode replicatorStop(String dbName) {
-    if (databases.isEmpty()) {
-      return DATABASE_DOES_NOT_EXIST;
+  public ResultCode replicatorStop(Integer hashCode) {
+    if (_replicatorResources.isEmpty() || _replicatorResources.get(hashCode) == null) {
+      return ResultCode.REPLICATOR_DOES_NOT_EXIST;
     } else {
-      DatabaseResource dbr = databases.get(dbName);
-      if (dbr != null) {
-        Replicator rp = dbr.getReplicator();
-        if (rp != null) {
-          rp.stop();
-          dbr.setReplicator(null);
-          return ResultCode.SUCCESS;
-        }
-      } else {
-        return ResultCode.REPLICATOR_DOES_NOT_EXIST;
-      }
+      ReplicatorResource replicatorResource = _replicatorResources.get(hashCode);
+      replicatorResource.getReplicator().stop();
+      return ResultCode.SUCCESS;
     }
-    return ResultCode.ERROR;
   }
 
-  public ResultCode replicatorAddChangeListener(ListenerArgument arguments, CordovaWebView webView) {
+  public ResultCode replicatorAddChangeListener(Integer hashCode, String jsCallback, CordovaWebView webView) {
 
-    if (!databases.isEmpty()) {
-      String dbName = arguments.getDatabaseName();
-      String callbackFn = arguments.getCallback();
+    if (!_replicatorResources.isEmpty()) {
+      ReplicatorResource replicatorResource = _replicatorResources.get(hashCode);
+      replicatorResource.setReplicatorChangeListenerJSFunction(jsCallback);
 
-      DatabaseResource dbr = databases.get(dbName);
-      dbr.setReplicatorChangeListenerJSFunction(callbackFn);
+      if (replicatorResource.getReplicatorChangeListenerToken() == null) {
 
-      if (dbr.getReplicatorChangeListenerToken() == null) {
-
-        Replicator replicator = dbr.getReplicator();
+        Replicator replicator = replicatorResource.getReplicator();
 
         if (replicator != null) {
           ListenerToken replicationListenerToken = replicator.addChangeListener(new ReplicatorChangeListener() {
             @Override
             public void changed(@NonNull ReplicatorChange change) {
-              DatabaseResource ldbr = databases.get(change.getReplicator().getConfig().getDatabase().getName());
 
               try {
                 JSONObject replicatorChange = new JSONObject();
@@ -804,7 +794,7 @@ public class DatabaseManager {
                 replicatorChange.put("completed", change.getStatus().getProgress().getCompleted());
                 replicatorChange.put("total", change.getStatus().getProgress().getTotal());
 
-                String jsCallbackFn = ldbr.getReplicatorChangeListenerJSFunction();
+                String jsCallbackFn = replicatorResource.getReplicatorChangeListenerJSFunction();
 
                 if (jsCallbackFn != null && !jsCallbackFn.isEmpty()) {
                   String params = replicatorChange.toString();
@@ -816,8 +806,7 @@ public class DatabaseManager {
               }
             }
           });
-
-          dbr.setReplicatorChangeListenerToken(replicationListenerToken);
+          replicatorResource.setReplicatorChangeListenerToken(replicationListenerToken);
         } else {
           return ResultCode.REPLICATOR_DOES_NOT_EXIST;
         }
@@ -827,30 +816,27 @@ public class DatabaseManager {
       }
 
     } else {
-      return ResultCode.DATABASE_DOES_NOT_EXIST;
+      return ResultCode.REPLICATOR_DOES_NOT_EXIST;
     }
 
     return ResultCode.SUCCESS;
   }
 
-  public ResultCode replicatorRemoveChangeListener(ListenerArgument listenerArgument) {
+  public ResultCode replicatorRemoveChangeListener(Integer hashCode) {
 
-    String database = listenerArgument.getDatabaseName();
-    if (!databases.containsKey(database)) {
-      return DATABASE_DOES_NOT_EXIST;
-    }
-
-    DatabaseResource dbResource = databases.get(database);
-    Replicator rp = dbResource.getReplicator();
-
-    if (dbResource.getReplicatorChangeListenerToken() != null) {
-      rp.removeChangeListener(dbResource.getReplicatorChangeListenerToken());
-      dbResource.setReplicatorChangeListenerToken(null);
-    } else {
+    if (_replicatorResources.isEmpty()) {
+      return REPLICATOR_DOES_NOT_EXIST;
+    } else if (_replicatorResources.get(hashCode) != null && _replicatorResources.get(hashCode).getReplicatorChangeListenerToken() != null) {
+      ReplicatorResource rr = _replicatorResources.get(hashCode);
+      Replicator rp = rr.getReplicator();
+      rp.removeChangeListener(rr.getReplicatorChangeListenerToken());
+      rr.setReplicatorChangeListenerToken(null);
+      return ResultCode.SUCCESS;
+    } else if (_replicatorResources.get(hashCode).getReplicatorChangeListenerToken() == null) {
       return ResultCode.REPLICATOR_LISTENER_DOES_NOT_EXISTS;
     }
 
-    return ResultCode.SUCCESS;
+    return ResultCode.ERROR;
   }
 
   public ResultCode queryAddChangeListener(QueryArgument queryArgument, CordovaWebView webView) {
@@ -960,5 +946,32 @@ public class DatabaseManager {
 
     }
     return ResultCode.SUCCESS;
+  }
+
+  public Integer replicator(Integer configHash, ReplicatorConfiguration configuration) {
+
+    Integer resultHash = 0;
+
+    if (_replicatorResources.get(configHash) != null) {
+      //check if replicator already exists, if so we need to make sure we stop it and remove the listener before swapping out
+
+      if (_replicatorResources.get(configHash) != null && _replicatorResources.get(configHash).getReplicator() != null) {
+        _replicatorResources.get(configHash).getReplicator().stop();
+        //remove the listener before creating new replicator
+        ListenerToken token = _replicatorResources.get(configHash).getReplicatorChangeListenerToken();
+
+        if (token != null) {
+          _replicatorResources.get(configHash).getReplicator().removeChangeListener(token);
+        }
+      }
+    }
+
+    Replicator replicator = new Replicator(configuration);
+    ReplicatorResource replicatorResource = new ReplicatorResource(replicator);
+    _replicatorResources.put(configHash, replicatorResource);
+
+    resultHash = configHash;
+
+    return resultHash;
   }
 }

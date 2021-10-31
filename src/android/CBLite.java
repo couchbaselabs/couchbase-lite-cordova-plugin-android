@@ -2,6 +2,7 @@ package com.couchbase.cblite;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.util.Pair;
 
 import com.couchbase.cblite.enums.ResultCode;
 import com.couchbase.cblite.objects.DatabaseArgument;
@@ -12,12 +13,15 @@ import com.couchbase.cblite.objects.FTSIndexArgument;
 import com.couchbase.cblite.objects.ListenerArgument;
 import com.couchbase.cblite.objects.LogArgument;
 import com.couchbase.cblite.objects.QueryArgument;
+import com.couchbase.cblite.objects.ReplicatorConfigHash;
 import com.couchbase.cblite.objects.ValueIndexArgument;
 import com.couchbase.cblite.utils.DatabaseManager;
+import com.couchbase.lite.AbstractReplicatorConfiguration;
 import com.couchbase.lite.BasicAuthenticator;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Log;
 import com.couchbase.lite.ReplicatorConfiguration;
+import com.couchbase.lite.ReplicatorType;
 import com.couchbase.lite.SessionAuthenticator;
 import com.couchbase.lite.URLEndpoint;
 
@@ -70,6 +74,7 @@ public class CBLite extends CordovaPlugin {
   private static final String ACTION_ENABLE_LOGGING = "enableConsoleLogging";
 
 
+  private static final String ACTION_REPLICATOR = "replicator";
   private static final String ACTION_REPLICATOR_START = "replicatorStart";
   private static final String ACTION_REPLICATOR_STOP = "replicatorStop";
   private static final String ACTION_REPLICATOR_ADD_LISTENER = "replicatorAddChangeListener";
@@ -166,6 +171,10 @@ public class CBLite extends CordovaPlugin {
         databaseExists(args, callbackContext);
         return true;
 
+      case ACTION_REPLICATOR:
+        replicator(args, callbackContext);
+        return true;
+
       case ACTION_REPLICATOR_START:
         replicatorStart(args, callbackContext);
         return true;
@@ -193,6 +202,8 @@ public class CBLite extends CordovaPlugin {
     }
 
   }
+
+
 
   private DatabaseArgument parseDatabaseArguments(JSONObject dictionary, CallbackContext callbackContext) {
     DatabaseArgument argument = new DatabaseArgument();
@@ -409,8 +420,9 @@ public class CBLite extends CordovaPlugin {
       PluginResult pluginResult;
       JSONObject configs = args.getJSONObject(0);
       String resourceDbName = configs.getString("fromPath");
+      String newDbName = configs.getString("dbName");
 
-      if (resourceDbName.equals("")) {
+      if (resourceDbName.equals("") || newDbName.equals("")) {
         pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
         pluginResult.setKeepCallback(false);
         callbackContext.sendPluginResult(pluginResult);
@@ -418,7 +430,7 @@ public class CBLite extends CordovaPlugin {
       }
 
       JSONObject newConfig = configs.getJSONObject("newConfig");
-
+      newConfig.put("dbName", newDbName);
       newDbArgs = parseDatabaseArguments(newConfig, callbackContext);
 
       DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
@@ -1195,24 +1207,59 @@ public class CBLite extends CordovaPlugin {
     }
   }
 
+  private void replicator(JSONArray args, CallbackContext callbackContext) {
+    try {
+
+      Pair<Integer, ReplicatorConfiguration> pairConfig = parseReplicatorConfiguration(args.getJSONObject(0), callbackContext);
+      if (pairConfig == null) {
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
+        pluginResult.setKeepCallback(false);
+        callbackContext.sendPluginResult(pluginResult);
+      }
+
+      Integer configHash = pairConfig.first;
+      ReplicatorConfiguration configuration = pairConfig.second;
+
+      DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
+      Integer resultHash = dbMgr.replicator(configHash, configuration);
+
+      PluginResult pluginResult;
+      if (resultHash != 0) {
+        JSONObject result = new JSONObject();
+        result.put("data", resultHash);
+        pluginResult = new PluginResult(PluginResult.Status.OK, result.toString());
+      } else {
+        pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: error trying to encode hash.");
+      }
+      pluginResult.setKeepCallback(false);
+      callbackContext.sendPluginResult(pluginResult);
+
+    } catch (JSONException e) {
+      PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
+      pluginResult.setKeepCallback(false);
+      callbackContext.sendPluginResult(pluginResult);
+      e.printStackTrace();
+    }
+  }
+
   private void replicatorStart(JSONArray args, CallbackContext callbackContext) {
 
     try {
+      JSONObject arguments = args.getJSONObject(0);
+      Integer hashCode = arguments.has("hash") ? arguments.getInt("hash") : null;
 
-      ReplicatorConfiguration config = parseReplicatorConfiguration(args.getJSONObject(0), callbackContext);
-
-      if (config != null) {
+      if (hashCode != null) {
 
         DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-        ResultCode result = dbMgr.replicatorStart(config);
+        ResultCode result = dbMgr.replicatorStart(hashCode);
 
         PluginResult pluginResult;
         if (result == ResultCode.SUCCESS) {
           pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
         } else if (result == ResultCode.MISSING_PARAM) {
           pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Invalid or missing parameters");
-        } else if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
-          pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Database does not exist.");
+        } else if (result == ResultCode.REPLICATOR_DOES_NOT_EXIST) {
+          pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Replicator does not exist.");
         } else {
           pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Error trying to start replicator");
         }
@@ -1239,36 +1286,37 @@ public class CBLite extends CordovaPlugin {
   private void replicatorStop(JSONArray args, CallbackContext callbackContext) {
 
     try {
+      JSONObject arguments = args.getJSONObject(0);
+      Integer hashCode = arguments.has("hash") ? arguments.getInt("hash") : null;
 
-      PluginResult pluginResult;
-      JSONObject config = args.getJSONObject(0);
+      if (hashCode != null) {
 
-      String dbName = config.has("dbName") ? config.getString("dbName") : null;
+        DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
+        ResultCode result = dbMgr.replicatorStop(hashCode);
 
-      if (dbName == null || dbName.isEmpty()) {
-        pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
+        PluginResult pluginResult;
+        if (result == ResultCode.SUCCESS) {
+          pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
+        } else if (result == ResultCode.MISSING_PARAM) {
+          pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Invalid or missing parameters");
+        } else if (result == ResultCode.REPLICATOR_DOES_NOT_EXIST) {
+          pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Replicator does not exist.");
+        } else {
+          pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Error trying to stop replicator");
+        }
+
         pluginResult.setKeepCallback(false);
         callbackContext.sendPluginResult(pluginResult);
-        return;
-      }
 
-      DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-      ResultCode resultCode = dbMgr.replicatorStop(dbName);
-
-      if (resultCode == ResultCode.SUCCESS) {
-        pluginResult = new PluginResult(PluginResult.Status.OK, "OK");
-      } else if (resultCode == ResultCode.DATABASE_DOES_NOT_EXIST) {
-        pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no databases found in collection, please open/create a database first.");
-      } else if (resultCode == ResultCode.REPLICATOR_DOES_NOT_EXIST) {
-        pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: replicator not found.");
       } else {
-        pluginResult = new PluginResult(PluginResult.Status.ERROR, "Error stopping replicator.");
-      }
 
-      pluginResult.setKeepCallback(false);
-      callbackContext.sendPluginResult(pluginResult);
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Invalid or missing parameters.");
+        pluginResult.setKeepCallback(false);
+        callbackContext.sendPluginResult(pluginResult);
+      }
 
     } catch (JSONException e) {
+      e.printStackTrace();
       PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
       pluginResult.setKeepCallback(false);
       callbackContext.sendPluginResult(pluginResult);
@@ -1279,13 +1327,13 @@ public class CBLite extends CordovaPlugin {
   private void replicatorAddListener(JSONArray args, CallbackContext callbackContext) {
     try {
 
-      JSONObject params = args.getJSONObject(0);
-
+      JSONObject arguments = args.getJSONObject(0);
+      Integer hashCode = arguments.has("hash") ? arguments.getInt("hash") : null;
+      String jsCallback = arguments.has("jsCallback") ? arguments.getString("jsCallback"): null;
       PluginResult pluginResult;
-      ListenerArgument arguments = parseListenerArguments(params);
 
-      if (arguments == null) {
-        pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database name must be passed in as argument.");
+      if (hashCode == null || jsCallback == null) {
+        pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Invalid or missing parameters.");
         pluginResult.setKeepCallback(false);
         callbackContext.sendPluginResult(pluginResult);
         return;
@@ -1294,11 +1342,9 @@ public class CBLite extends CordovaPlugin {
       DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
 
       CordovaWebView cdv = this.webView;
-      ResultCode result = dbMgr.replicatorAddChangeListener(arguments, cdv);
+      ResultCode result = dbMgr.replicatorAddChangeListener(hashCode, jsCallback, cdv);
 
-      if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
-        pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database does not exist.");
-      } else if (result == ResultCode.REPLICATOR_DOES_NOT_EXIST) {
+      if (result == ResultCode.REPLICATOR_DOES_NOT_EXIST) {
         pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: replicator does not exist. Please create a replicator first to add the listener.");
       } else if (result == ResultCode.ERROR) {
         pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: adding change listener.");
@@ -1325,24 +1371,21 @@ public class CBLite extends CordovaPlugin {
 
     try {
 
-      JSONObject params = args.getJSONObject(0);
-
+      JSONObject arguments = args.getJSONObject(0);
+      Integer hashCode = arguments.has("hash") ? arguments.getInt("hash") : null;
       PluginResult pluginResult;
-      ListenerArgument arguments = parseListenerArguments(params);
 
-      if (arguments == null) {
-        pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database name must be passed in as argument.");
+      if (hashCode == null ) {
+        pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Invalid or missing parameters.");
         pluginResult.setKeepCallback(false);
         callbackContext.sendPluginResult(pluginResult);
         return;
       }
 
       DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-      ResultCode result = dbMgr.replicatorRemoveChangeListener(arguments);
+      ResultCode result = dbMgr.replicatorRemoveChangeListener(hashCode);
 
-      if (result == ResultCode.DATABASE_DOES_NOT_EXIST) {
-        pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: database does not exist.");
-      } else if (result == ResultCode.REPLICATOR_LISTENER_DOES_NOT_EXISTS) {
+      if (result == ResultCode.REPLICATOR_LISTENER_DOES_NOT_EXISTS) {
         pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: couldn't find replicator listener token to remove");
       } else if (result == ResultCode.ERROR) {
         pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: error removing change listener.");
@@ -1451,9 +1494,10 @@ public class CBLite extends CordovaPlugin {
     }
   }
 
-  private ReplicatorConfiguration parseReplicatorConfiguration(JSONObject dictionary, CallbackContext callbackContext) {
+  private Pair<Integer, ReplicatorConfiguration> parseReplicatorConfiguration(JSONObject dictionary, CallbackContext callbackContext) {
     ReplicatorConfiguration config = null;
     Database database;
+    ReplicatorConfigHash configHash = null;
 
     try {
       String dbName = dictionary.has("databaseName") ? dictionary.getString("databaseName").toLowerCase() : null;
@@ -1549,21 +1593,19 @@ public class CBLite extends CordovaPlugin {
         }
 
         if (dictionary.has("replicatorType")) {
-          // TODO
-          //config.setReplicatorType()  Deprecated ??
 
-                  /*  String replicatorType = dictionary.getString("replicatorType");
+          String replicatorType = dictionary.getString("replicatorType");
 
-                    switch(replicatorType) {
-                        case "PULL":
-                            config.setReplicatorType(ReplicatorConfiguration.ReplicatorType.PULL);
-                            break;
-                        case "PUSH":
-                            config.setReplicatorType(ReplicatorConfiguration.ReplicatorType.PUSH);
-                            break;
-                        default:
-                            config.setReplicatorType(ReplicatorConfiguration.ReplicatorType.PUSH_AND_PULL);
-                    }*/
+            switch(replicatorType) {
+                case "PULL":
+                  config.setType(ReplicatorType.PULL);
+                    break;
+                case "PUSH":
+                  config.setType(ReplicatorType.PUSH);
+                    break;
+                default:
+                  config.setType(ReplicatorType.PUSH_AND_PULL);
+            }
 
         }
 
@@ -1616,11 +1658,22 @@ public class CBLite extends CordovaPlugin {
         }
       }
 
+      configHash = new ReplicatorConfigHash();
+      configHash.setDatabaseName(dbName);
+      configHash.setContinuous(config.isContinuous());
+      configHash.setReplicationType(config.getType().hashCode());
+      configHash.setChannels(config.getChannels());
+      configHash.setDocumentIds(config.getDocumentIDs());
+
     } catch (JSONException | URISyntaxException e) {
       config = null;
       e.printStackTrace();
     }
-    return config;
+
+    int hashCode = configHash.hashCode();
+    Pair<Integer, ReplicatorConfiguration> configPair = new Pair<>(hashCode, config);
+
+    return configPair;
   }
 
   private byte[] getPinnedCertFile(Context context, String resource) {

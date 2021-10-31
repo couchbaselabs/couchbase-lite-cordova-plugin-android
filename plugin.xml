@@ -14,6 +14,7 @@
 
         <source-file src="src/android/CBLite.java" target-dir="src/com/couchbase/cblite" />
         <source-file src="src/android/utils/DatabaseManager.java" target-dir="src/com/couchbase/cblite/utils" />
+		
         <source-file src="src/android/objects/DatabaseArgument.java" target-dir="src/com/couchbase/cblite/objects" />
         <source-file src="src/android/objects/DatabaseResource.java" target-dir="src/com/couchbase/cblite/objects" />
         <source-file src="src/android/objects/DocumentArgument.java" target-dir="src/com/couchbase/cblite/objects" />
@@ -24,6 +25,8 @@
         <source-file src="src/android/objects/DeleteIndexArgument.java" target-dir="src/com/couchbase/cblite/objects" />
         <source-file src="src/android/objects/QueryListenerResource.java" target-dir="src/com/couchbase/cblite/objects" />
         <source-file src="src/android/objects/LogArgument.java" target-dir="src/com/couchbase/cblite/objects" />
+		<source-file src="src/android/objects/ReplicatorConfigHash.java" target-dir="src/com/couchbase/cblite/objects" />
+		<source-file src="src/android/objects/ReplicatorResource.java" target-dir="src/com/couchbase/cblite/objects" />
 
         <source-file src="src/android/enums/ResultCode.java" target-dir="src/com/couchbase/cblite/enums" />
 
