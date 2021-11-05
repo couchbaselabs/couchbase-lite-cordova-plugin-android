@@ -41,16 +41,12 @@ The following is list of APIs (& features) exported by the plugin.
 | queryAddListener | Query | Adds a query change listener. Changes will be posted on the main thread(android)/queue(ios). |
 | queryRemoveListener | Query | Removes a query change listener. |
 | ReplicatorConfiguration | Replicator | Helper method to create replicator configuration object. |
-| createReplicator | Replicator | Helper method to create replicator configuration object. |
 | start | Replicator | Initializes a replicator with the given configuration. The replicator is used for  replicating document changes between a local database and a target database. The replicator can be bidirectional or either push or pull. The replicator can also be one-short or continuous. The replicator runs asynchronously, so observe the status property to be notified of progress. |
 | stop | Replicator | Stops a running replicator. This method returns immediately; when the replicator actually stops, the replicator will change its status’s activity level to stopped and the replicator change notification will be notified accordingly. |
 | BasicAuthenticator | BasicAuthentication  | The BasicAuthentiatior is an authenticator that will authenticate using HTTP Basic auth with the given username and password. This should only be used over an SSL/TLS connection, as otherwise it's very easy for anyone sniffing network traffic to read the password. |
 | SessionAuthenticator | SessionAuthentication | The SessionAuthenticatior is an authenticator that will authenticate by using the session ID of the session created by a Sync Gateway |
 | addChangeListener | Replicator | Adds a replication change listener. Changes will be posted on the main thread(android)/queue(ios). |
 | removeChangeListener | Replicator | Removes the replication change listener. |
-| replicatorAddListener | Replicator | Adds a replication change listener. Changes will be posted on the main thread(android)/queue(ios). |
-| replicatorRemoveListener | Replicator | Removes the replication change listener. |
-
 
 
 ## Getting Started
@@ -323,6 +319,7 @@ let indexes = [{{INDEX_ARRAY}}];
 CBL.createValueIndex(dbName, indexName, indexes, function(rs) {}, function(err) { });
 
 ```
+
 **Create FTS Index**
 
 ```
@@ -333,25 +330,25 @@ let ignoreAccents = {{true OR false}};
 let language = "{{LANGUAGE_VALUE}}"; 
 
 CBL.createValueIndex(dbName, indexName, ignoreAccents, language, indexes, function(rs) { }, function(error) { });
-
 ```
+
 **Delete Index**
+
 ```
 let dbName = "{{DATABASE_NAME}}";
 let indexName = "{{INDEX_NAME}}";
 CBL.deleteIndex(dbName, indexName, function(rs) { }, function(error) { });
-
 ```
+
 **Execute Query**
 
 ```
 let dbName = "{{DATABASE_NAME}}";
 let query = "{{QUERY_STRING}}";
 CBL.query(dbName, query, function(rs) { }, function(error) { });
-
 ```
 
-**Start Replicator**
+**Init Replicator**
 
 ```
 let dbName = "{{DATABASE_NAME}}";
@@ -361,37 +358,43 @@ replicatorConfig.authenticator = CBL.BasicAuthenticator('{{USERNAME}}', '{{PASSW
 replicatorConfig.channels = ['channel.{{USERNAME}}'];
 replicatorConfig.replicatorType = CBL.ReplicatorType.PUSH_AND_PULL; // PUSH / PULL / PUSH_AND_PULL
 
-CBL.replicatorStart(replicatorConfig, function(rs) {  console.log(rs); }, function(err) { console.log(err) });
+let replicator = CBL.Replicator(replicatorConfig, function(rs) { console.log (rs);} , function(err) {console.log(err); }); // returns Replicator Hash in success callback.
+```
 
+**Start Replicator**
+
+```
+let hash = "{{REPLICATOR_HASH}}"
+replicator.start(hash, function(rs) {  console.log(rs); }, function(err) { console.log(err) });
 ```
 
 **Stop Replicator**
 
 ```
-let dbName = "{{DATABASE_NAME}}";
-CBL.replicatorStop(dbName, function(rs) {  console.log(rs); }, function(err) { console.log(err) });
+let hash = "{{REPLICATOR_HASH}}";
+CBL.stop(hash, function(rs) {  console.log(rs); }, function(err) { console.log(err) });
 
 ```
 
-**Add replicator listener**
+**Add change listener**
 
 ```
-let dbName = "{{DATABASE_NAME}}";
+let hash = "{{REPLICATOR_HASH}}";
 let replicatorCB = function (rs) { console.log(rs) };
-CBL.replicationAddListener(dbName, 'replicatorCB', function(rs) { console.log(rs) }, function(err) { console.log(err) });
+CBL.addChangeListener(hash, 'replicatorCB', function(rs) { console.log(rs) }, function(err) { console.log(err) });
 
 ```
 
-**Remove replicator listener**
+**Remove change listener**
 
 ```
-let dbName = "{{DATABASE_NAME}}";
-let replicatorCB = function (rs) { console.log(rs) };
-CBL.replicationRemoveListener(dbName, function(rs) { console.log(rs) }, function(err) { console.log(err) });
+let hash = "{{REPLICATOR_HASH}}";
+CBL.removeChangeListener(hash, function(rs) { console.log(rs) }, function(err) { console.log(err) });
 
 ```
 
 **queryAddListener**
+
 ```
 let dbName = "{{DATABASE_NAME}}";
 let onQueryChange = function (rs) { console.log(rs) };
@@ -401,6 +404,7 @@ CBL.queryAddListener(dbName, query, 'onQueryChange', function (rs) { console.log
 
 
 **queryRemoveListener**
+
 ```
 let dbName = "{{DATABASE_NAME}}";
 let query = "{{QUERY_STRING}}";
