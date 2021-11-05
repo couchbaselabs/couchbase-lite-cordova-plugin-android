@@ -373,7 +373,7 @@ var replicatorConfig = CBL.ReplicatorConfiguration(dbName,'ws://{{SYNC_GATEWAY_I
 replicatorConfig.continuous = {{true/false}};
 replicatorConfig.authenticator = CBL.BasicAuthenticator('{{USERNAME}}', '{{PASSWORD}}');
 replicatorConfig.channels = ['channel.{{USERNAME}}'];
-replicatorConfig.replicatorType = CBL.ReplicatorType.PUSH_AND_PULL; // PUSH / PULL / PUSH_AND_PULL
+replicatorConfig.replicatorType = CBL.ReplicatorType.PUSH_AND_PULL; //{{ PUSH / PULL / PUSH_AND_PULL }}
 
 let replicator = CBL.Replicator(replicatorConfig, function(rs) { console.log (rs);} , function(err) {console.log(err); }); // returns Replicator Hash in success callback.
 ```
