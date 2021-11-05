@@ -348,6 +348,23 @@ let query = "{{QUERY_STRING}}";
 CBL.query(dbName, query, function(rs) { }, function(error) { });
 ```
 
+**queryAddListener**
+
+```
+let dbName = "{{DATABASE_NAME}}";
+let onQueryChange = function (rs) { console.log(rs) };
+let query = "{{QUERY_STRING}}";
+CBL.queryAddListener(dbName, query, 'onQueryChange', function (rs) { console.log(rs); }, function (err) { console.log(err)});
+```
+
+**queryRemoveListener**
+
+```
+let dbName = "{{DATABASE_NAME}}";
+let query = "{{QUERY_STRING}}";
+CBL.queryRemoveListener(dbName, query, function (rs) { console.log(rs); }, function (err) { console.log(err)});
+```
+
 **Init Replicator**
 
 ```
@@ -392,25 +409,6 @@ let hash = "{{REPLICATOR_HASH}}";
 CBL.removeChangeListener(hash, function(rs) { console.log(rs) }, function(err) { console.log(err) });
 
 ```
-
-**queryAddListener**
-
-```
-let dbName = "{{DATABASE_NAME}}";
-let onQueryChange = function (rs) { console.log(rs) };
-let query = "{{QUERY_STRING}}";
-CBL.queryAddListener(dbName, query, 'onQueryChange', function (rs) { console.log(rs); }, function (err) { console.log(err)});
-```
-
-
-**queryRemoveListener**
-
-```
-let dbName = "{{DATABASE_NAME}}";
-let query = "{{QUERY_STRING}}";
-CBL.queryRemoveListener(dbName, query, function (rs) { console.log(rs); }, function (err) { console.log(err)});
-```
-
 
 ## Quick Debug
 
