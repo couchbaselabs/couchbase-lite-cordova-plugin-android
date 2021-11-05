@@ -618,7 +618,10 @@ cblite.prototype.queryRemoveListener = function(dbName, query, successCallback, 
  * @param errorCallback 
  *          {callback} javascript function to call if error happens in native code 
 */
-cblite.prototype.Replicator = function(config){
+cblite.prototype.Replicator = function(config, success, fail){
+	if (config == null) {
+		throw ("error: config can't be null");
+	}
 	this.replicatorConfig = config;
 
 	/** createReplicator - creates a replicator and returns the Hash Code that can be used i
@@ -626,15 +629,16 @@ cblite.prototype.Replicator = function(config){
 	 * is required in order to support multiple replicators on the same database but with different
 	 * configuration options.  The hash code is returned in the successCallback as a JSON string.
 	 *
-	 * @param successCallback 
-	 *          {callback} javascript function to call if native code is successful 
-	 * @param errorCallback 
+	 * @param successCallback
+	 *          {callback} javascript function to call if native code is successful
+	 * @param errorCallback
 	 *          {callback} javascript function to call if error happens in native
-	 *  		code 
+	 *  		code
 	*/
-	this.createReplicator = function(successCallback, errorCallback){
-		exec(successCallback, errorCallback, PLUGIN_NAME, 'replicator', [this.replicatorConfig]);
+	var createReplicator = function(config, successCallback, errorCallback){
+		exec(successCallback, errorCallback, PLUGIN_NAME, 'replicator', [config]);
 	}
+	createReplicator(config, success, fail);
 
 	/** addChangeListener - Adds a replication change listener. Changes will be 
  	 * posted on the main thread(android)/queue(ios).

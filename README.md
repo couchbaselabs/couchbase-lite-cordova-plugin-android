@@ -48,6 +48,8 @@ The following is list of APIs (& features) exported by the plugin.
 | SessionAuthenticator | SessionAuthentication | The SessionAuthenticatior is an authenticator that will authenticate by using the session ID of the session created by a Sync Gateway |
 | addChangeListener | Replicator | Adds a replication change listener. Changes will be posted on the main thread(android)/queue(ios). |
 | removeChangeListener | Replicator | Removes the replication change listener. |
+| replicatorAddListener | Replicator | Adds a replication change listener. Changes will be posted on the main thread(android)/queue(ios). |
+| replicatorRemoveListener | Replicator | Removes the replication change listener. |
 
 
 
