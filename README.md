@@ -390,7 +390,6 @@ replicator.start(hash, function(rs) {  console.log(rs); }, function(err) { conso
 ```
 let hash = "{{REPLICATOR_HASH}}";
 CBL.stop(hash, function(rs) {  console.log(rs); }, function(err) { console.log(err) });
-
 ```
 
 **Add change listener**
@@ -399,7 +398,6 @@ CBL.stop(hash, function(rs) {  console.log(rs); }, function(err) { console.log(e
 let hash = "{{REPLICATOR_HASH}}";
 let replicatorCB = function (rs) { console.log(rs) };
 CBL.addChangeListener(hash, 'replicatorCB', function(rs) { console.log(rs) }, function(err) { console.log(err) });
-
 ```
 
 **Remove change listener**
@@ -407,7 +405,6 @@ CBL.addChangeListener(hash, 'replicatorCB', function(rs) { console.log(rs) }, fu
 ```
 let hash = "{{REPLICATOR_HASH}}";
 CBL.removeChangeListener(hash, function(rs) { console.log(rs) }, function(err) { console.log(err) });
-
 ```
 
 ## Quick Debug
