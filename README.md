@@ -398,13 +398,10 @@ replicatorConfig.channels = ['channel.{{USERNAME}}']; // optional
 replicatorConfig.replicatorType = CBL.ReplicatorType.PUSH_AND_PULL; //{{ PUSH / PULL / PUSH_AND_PULL }}
 
 
-let replicator = CBL.Replicator(replicatorConfig, function(result) {
-                    console.log("result:" + JSON.parse(result));
-                    var result = JSON.parse(result); // parse result to get replicatorHash
-                    var replicatorId = result.data; // This is unique replicatorId
-                    console.log("replicatorId:" + replicatorId); // you need to retain this for other replicator calls
+let replicator = CBL.Replicator(replicatorConfig, function(result) { // replicator hash is stored in replicator object itself.
+                    console.log("result:" + result);                 
               }, 
-          function(error) {console.log(error)});; // returns Replicator Hash in success callback.
+          function(error) {console.log(error)});
   
 
 ```
@@ -412,31 +409,27 @@ let replicator = CBL.Replicator(replicatorConfig, function(result) {
 **Start Replicator**
 
 ```
-let replicatorId = "{{REPLICATOR_HASH}}" // This is hash value returned from Replicator init response
-replicator.start(replicatorId, function(result) {console.log("result:" + JSON.stringify(result)) }, function(error) {console.log(error)});
+replicator.start(function(result) {console.log("result:" + JSON.stringify(result)) }, function(error) {console.log(error)});
 ```
 
 **Stop Replicator**
 
 ```
-let replicatorId = "{{REPLICATOR_HASH}}"; // This is hash value returned from Replicator init response
-replicator.stop(replicatorId, function(result) {console.log("result:" + JSON.stringify(result)) }, function(error) {console.log(error)});
+replicator.stop(function(result) {console.log("result:" + JSON.stringify(result)) }, function(error) {console.log(error)});
 ```
 
 **Add Replicator change listener**
 
 ```
-let replicatorId = "{{REPLICATOR_HASH}}"; // This is hash value returned from Replicator init response
 let replicatorCallback = function (rs) { console.log(rs) };
 
-replicator.addChangeListener(hash, 'replicatorCallback', function(result) {console.log("result:" + JSON.stringify(result)) }, function(error) {console.log(error)});
+replicator.addChangeListener('replicatorCallback', function(result) {console.log("result:" + JSON.stringify(result)) }, function(error) {console.log(error)});
 ```
 
 **Remove Replicator change listener**
 
 ```
-let replicatorId = "{{REPLICATOR_HASH}}";  // This is hash value returned from Replicator init response
-replicator.removeChangeListener(replicatorId, function(result) {console.log("result:" + JSON.stringify(result)) }, function(error) {console.log(error)});
+replicator.removeChangeListener(function(result) {console.log("result:" + JSON.stringify(result)) }, function(error) {console.log(error)});
 ```
 
 ## Quick Debug
