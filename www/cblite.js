@@ -622,7 +622,9 @@ cblite.prototype.Replicator = function(config, success, fail){
 	if (config == null) {
 		throw ("error: config can't be null");
 	}
-	this.replicatorConfig = config;
+	var that = this;
+	that.replicatorConfig = config;
+	that.replicatorHash = null;
 
 	/** createReplicator - creates a replicator and returns the Hash Code that can be used i
 	 * the start, stop, addChangeListener, and removeChangeListener functions.  This hash code
@@ -638,13 +640,19 @@ cblite.prototype.Replicator = function(config, success, fail){
 	var createReplicator = function(config, successCallback, errorCallback){
 		exec(successCallback, errorCallback, PLUGIN_NAME, 'replicator', [config]);
 	}
-	createReplicator(config, success, fail);
+
+	createReplicator(config, function(result) {
+		var result = JSON.parse(result); // parse result to get replicatorHash
+		that.replicatorHash = result.data;
+		success('OK');
+	}, function(err) {
+		that.replicatorHash = null;
+		fail(err);
+	});
 
 	/** addChangeListener - Adds a replication change listener. Changes will be 
  	 * posted on the main thread(android)/queue(ios).
 	 *
-	 * @param replicatorHash 
-	 *          {replicatorHash} hash code returned from createReplicator function 
 	 * @param callbackName 
 	 *          {callback} javascript function to call when changes are posted.  
 	 * @param successCallback 
@@ -653,12 +661,12 @@ cblite.prototype.Replicator = function(config, success, fail){
 	 *          {callback} javascript function to call if error happens in native
 	 *  		code 
 	*/
-	this.addChangeListener = function(replicatorHash, callbackName, successCallback, errorCallback) {
-		if (replicatorHash == null || callbackName == null) {
+	this.addChangeListener = function(callbackName, successCallback, errorCallback) {
+		if (that.replicatorHash == null || callbackName == null) {
 			throw ("error: hash and callbackName can't be null");
 		}
 		let args = {
-			hash: replicatorHash, 
+			hash: that.replicatorHash, 
 			jsCallback: callbackName
 		};
 		exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorAddChangeListener', [args]);
@@ -666,20 +674,18 @@ cblite.prototype.Replicator = function(config, success, fail){
 
 	/** removeChangeListener - removes the replication change listener. 
 	 *
-	 * @param replicatorHash 
-	 *          {replicatorHash} hash code returned from createReplicator function
 	 * @param successCallback 
 	 *          {callback} javascript function to call if native code is successful 
 	 * @param errorCallback 
 	 *          {callback} javascript function to call if error happens in native
 	 *  		code 
 	*/
-	this.removeChangeListener = function(replicatorHash, successCallback, errorCallback) {
-		if (replicatorHash == null) {
+	this.removeChangeListener = function(successCallback, errorCallback) {
+		if (that.replicatorHash == null) {
 			throw ("error: hash can't be null");
 		}
 		let args = {
-			hash: replicatorHash
+			hash: that.replicatorHash
 		};
 		exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorRemoveChangeListener', [args]);
 	};
@@ -687,19 +693,17 @@ cblite.prototype.Replicator = function(config, success, fail){
 	/** start - Starts the replicator. This method returns immediately; the replicator runs asynchronously and will report its 
 	* progress through the replicator change notification.
 	*
- 	* @param replicatorHash 
-	*          {replicatorHash} hash code returned from createReplicator function
  	* @param successCallback 
  	*          {callback} javascript function to call if native code is successful 
  	* @param errorCallback 
  	*          {callback} javascript function to call if error happens in native code 
 	*/
-	this.start = function(replicatorHash, successCallback, errorCallback) {
-		if (replicatorHash == null) {
+	this.start = function(successCallback, errorCallback) {
+		if (that.replicatorHash == null) {
 			throw ("error: hash can't be null");
 		}
 		let args = {
-			hash: replicatorHash
+			hash: that.replicatorHash
 		};
 		exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorStart', [args]);
 	};
@@ -715,12 +719,12 @@ cblite.prototype.Replicator = function(config, success, fail){
  	* @param errorCallback 
  	*          {callback} javascript function to call if error happens in native code 
 	*/
-	this.stop = function(replicatorHash, successCallback, errorCallback) {
-		if (replicatorHash == null) {
+	this.stop = function(successCallback, errorCallback) {
+		if (that.replicatorHash == null) {
 			throw ("error: hash can't be null");
 		}
 		let args = {
-			hash: replicatorHash
+			hash: that.replicatorHash
 		};
 		exec(successCallback, errorCallback, PLUGIN_NAME, 'replicatorStop', [args]);
 	};
