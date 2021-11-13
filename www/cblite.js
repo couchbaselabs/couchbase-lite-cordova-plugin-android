@@ -747,9 +747,9 @@ cblite.prototype.ReplicatorConfiguration = function (databaseName, targetUrl){
     obj.target = targetUrl;
 
 	obj.heartbeat = 0;
-	obj.replicatorType = null; 
-    obj.continuous = false; 
-    obj.authenticator = null; 
+	obj.replicatorType = this.ReplicatorType.PUSH_AND_PULL;
+    obj.continuous = true; 
+    obj.authenticator = {}; 
     obj.acceptOnlySelfSignedServerCertificate = false; 
     obj.pinnedServerCertificate = ""; 
     obj.headers = [];

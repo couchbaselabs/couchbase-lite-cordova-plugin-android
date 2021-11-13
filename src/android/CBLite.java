@@ -142,7 +142,12 @@ public class CBLite extends CordovaPlugin {
         return true;
 
       case ACTION_ENABLE_LOGGING:
-        enableConsoleLogging(args, callbackContext);
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            enableConsoleLogging(args, callbackContext);
+          }
+        });
         return true;
 
       case ACTION_QUERY_DATABASE:
@@ -202,7 +207,6 @@ public class CBLite extends CordovaPlugin {
     }
 
   }
-
 
 
   private DatabaseArgument parseDatabaseArguments(JSONObject dictionary, CallbackContext callbackContext) {
@@ -348,7 +352,9 @@ public class CBLite extends CordovaPlugin {
   private void databaseExists(JSONArray args, CallbackContext callbackContext) {
 
     try {
+
       DatabaseArgument dbArguments = this.parseDatabaseArguments(args.getJSONObject(0), callbackContext);
+
       DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
       ResultCode result = dbMgr.databaseExists(dbArguments);
 
@@ -1210,18 +1216,15 @@ public class CBLite extends CordovaPlugin {
   private void replicator(JSONArray args, CallbackContext callbackContext) {
     try {
 
-      Pair<Integer, ReplicatorConfiguration> pairConfig = parseReplicatorConfiguration(args.getJSONObject(0), callbackContext);
-      if (pairConfig == null) {
+      ReplicatorConfiguration configuration = parseReplicatorConfiguration(args.getJSONObject(0), callbackContext);
+      if (configuration == null) {
         PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: no arguments or invalid arguments passed in.");
         pluginResult.setKeepCallback(false);
         callbackContext.sendPluginResult(pluginResult);
       }
 
-      Integer configHash = pairConfig.first;
-      ReplicatorConfiguration configuration = pairConfig.second;
-
       DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
-      Integer resultHash = dbMgr.replicator(configHash, configuration);
+      Integer resultHash = dbMgr.replicator(configuration);
 
       PluginResult pluginResult;
       if (resultHash != 0) {
@@ -1329,7 +1332,7 @@ public class CBLite extends CordovaPlugin {
 
       JSONObject arguments = args.getJSONObject(0);
       Integer hashCode = arguments.has("hash") ? arguments.getInt("hash") : null;
-      String jsCallback = arguments.has("jsCallback") ? arguments.getString("jsCallback"): null;
+      String jsCallback = arguments.has("jsCallback") ? arguments.getString("jsCallback") : null;
       PluginResult pluginResult;
 
       if (hashCode == null || jsCallback == null) {
@@ -1375,7 +1378,7 @@ public class CBLite extends CordovaPlugin {
       Integer hashCode = arguments.has("hash") ? arguments.getInt("hash") : null;
       PluginResult pluginResult;
 
-      if (hashCode == null ) {
+      if (hashCode == null) {
         pluginResult = new PluginResult(PluginResult.Status.ERROR, "error: Invalid or missing parameters.");
         pluginResult.setKeepCallback(false);
         callbackContext.sendPluginResult(pluginResult);
@@ -1494,10 +1497,9 @@ public class CBLite extends CordovaPlugin {
     }
   }
 
-  private Pair<Integer, ReplicatorConfiguration> parseReplicatorConfiguration(JSONObject dictionary, CallbackContext callbackContext) {
+  private ReplicatorConfiguration parseReplicatorConfiguration(JSONObject dictionary, CallbackContext callbackContext) {
     ReplicatorConfiguration config = null;
     Database database;
-    ReplicatorConfigHash configHash = null;
 
     try {
       String dbName = dictionary.has("databaseName") ? dictionary.getString("databaseName").toLowerCase() : null;
@@ -1555,8 +1557,6 @@ public class CBLite extends CordovaPlugin {
               headerMap.put(k, v);
             }
             config.setHeaders(headerMap);
-          } else {
-            config.setHeaders(null);
           }
         }
 
@@ -1571,8 +1571,6 @@ public class CBLite extends CordovaPlugin {
               channels.add(channelsArr.getString(i));
             }
             config.setChannels(channels);
-          } else {
-            config.setChannels(null);
           }
         }
 
@@ -1587,8 +1585,6 @@ public class CBLite extends CordovaPlugin {
               documentIds.add(documentIdsArr.getString(i));
             }
             config.setDocumentIDs(documentIds);
-          } else {
-            config.setDocumentIDs(null);
           }
         }
 
@@ -1596,16 +1592,17 @@ public class CBLite extends CordovaPlugin {
 
           String replicatorType = dictionary.getString("replicatorType");
 
-            switch(replicatorType) {
-                case "PULL":
-                  config.setType(ReplicatorType.PULL);
-                    break;
-                case "PUSH":
-                  config.setType(ReplicatorType.PUSH);
-                    break;
-                default:
-                  config.setType(ReplicatorType.PUSH_AND_PULL);
-            }
+          switch (replicatorType) {
+            case "PULL":
+              config.setType(ReplicatorType.PULL);
+              break;
+            case "PUSH":
+              config.setType(ReplicatorType.PUSH);
+              break;
+            case "PUSH_AND_PULL":
+              config.setType(ReplicatorType.PUSH_AND_PULL);
+              break;
+          }
 
         }
 
@@ -1618,11 +1615,12 @@ public class CBLite extends CordovaPlugin {
           config.setAcceptOnlySelfSignedServerCertificate(dictionary.getBoolean("acceptOnlySelfSignedServerCertificate"));
         }
 
-        if (dictionary.has("pinnedServerCertificateUri")) {
-          String pinnedServerCertificateUri = dictionary.getString("pinnedServerCertificateUri");
-          byte[] pinnedServerCert = this.getPinnedCertFile(context, pinnedServerCertificateUri);
-          // Set pinned certificate.
-          config.setPinnedServerCertificate(pinnedServerCert);
+        if (dictionary.has("pinnedServerCertificate")) {
+          String pinnedServerCertificate = dictionary.getString("pinnedServerCertificate");
+          if (!pinnedServerCertificate.equals("")) {
+            byte[] pinnedServerCert = this.getPinnedCertFile(context, pinnedServerCertificate);
+            config.setPinnedServerCertificate(pinnedServerCert);
+          }
         }
 
         if (dictionary.has("heartbeat")) {
@@ -1658,22 +1656,13 @@ public class CBLite extends CordovaPlugin {
         }
       }
 
-      configHash = new ReplicatorConfigHash();
-      configHash.setDatabaseName(dbName);
-      configHash.setContinuous(config.isContinuous());
-      configHash.setReplicationType(config.getType().hashCode());
-      configHash.setChannels(config.getChannels());
-      configHash.setDocumentIds(config.getDocumentIDs());
 
     } catch (JSONException | URISyntaxException e) {
       config = null;
       e.printStackTrace();
     }
 
-    int hashCode = configHash.hashCode();
-    Pair<Integer, ReplicatorConfiguration> configPair = new Pair<>(hashCode, config);
-
-    return configPair;
+    return config;
   }
 
   private byte[] getPinnedCertFile(Context context, String resource) {

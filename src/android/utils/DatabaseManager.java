@@ -138,10 +138,8 @@ public class DatabaseManager {
 
   public ResultCode databaseExists(DatabaseArgument dbArgument) {
 
-    DatabaseConfiguration dbConfig = getDatabaseConfig(dbArgument);
     String dbName = dbArgument.getName();
-
-    if (dbName != null && dbConfig != null) {
+    if (dbName != null) {
       boolean exists = Database.exists(dbName, new File(dbArgument.getDirectory()));
 
       if (exists) {
@@ -948,29 +946,38 @@ public class DatabaseManager {
     return ResultCode.SUCCESS;
   }
 
-  public Integer replicator(Integer configHash, ReplicatorConfiguration configuration) {
+  public Integer replicator(ReplicatorConfiguration configuration) {
 
     Integer resultHash = 0;
 
-    if (_replicatorResources.get(configHash) != null) {
+    Replicator replicator = new Replicator(configuration);
+    ReplicatorConfiguration config = replicator.getConfig();
+
+    ReplicatorConfigHash configHash = new ReplicatorConfigHash();
+    configHash.setDatabaseName(config.getDatabase().getName());
+    configHash.setContinuous(config.isContinuous());
+    configHash.setReplicationType(config.getType().hashCode());
+    configHash.setChannels(config.getChannels());
+    configHash.setDocumentIds(config.getDocumentIDs());
+
+    resultHash = configHash.hashCode();
+
+    if (_replicatorResources.get(resultHash) != null) {
       //check if replicator already exists, if so we need to make sure we stop it and remove the listener before swapping out
 
-      if (_replicatorResources.get(configHash) != null && _replicatorResources.get(configHash).getReplicator() != null) {
-        _replicatorResources.get(configHash).getReplicator().stop();
+      if (_replicatorResources.get(resultHash) != null && _replicatorResources.get(resultHash).getReplicator() != null) {
+        _replicatorResources.get(resultHash).getReplicator().stop();
         //remove the listener before creating new replicator
-        ListenerToken token = _replicatorResources.get(configHash).getReplicatorChangeListenerToken();
+        ListenerToken token = _replicatorResources.get(resultHash).getReplicatorChangeListenerToken();
 
         if (token != null) {
-          _replicatorResources.get(configHash).getReplicator().removeChangeListener(token);
+          _replicatorResources.get(resultHash).getReplicator().removeChangeListener(token);
         }
       }
     }
 
-    Replicator replicator = new Replicator(configuration);
     ReplicatorResource replicatorResource = new ReplicatorResource(replicator);
-    _replicatorResources.put(configHash, replicatorResource);
-
-    resultHash = configHash;
+    _replicatorResources.put(resultHash, replicatorResource);
 
     return resultHash;
   }
