@@ -392,13 +392,13 @@ CBL.queryRemoveListener(dbName, query, function(result) {console.log("result:" +
 let dbName = "{{DATABASE_NAME}}";
 var replicatorConfig = CBL.ReplicatorConfiguration(dbName,'ws://{{SYNC_GATEWAY_ENDPOINT}}/{{dbName}}'); // example: ws://sync-gateway:4984/db
 
-replicatorConfig.authenticator = CBL.BasicAuthenticator('{{USERNAME}}', '{{PASSWORD}}'); // required
+replicatorConfig.authenticator = CBL.BasicAuthenticator('{{USERNAME}}', '{{PASSWORD}}'); //optional
 replicatorConfig.continuous = {{true/false}}; // optional
 replicatorConfig.channels = ['channel.{{USERNAME}}']; // optional
-replicatorConfig.replicatorType = CBL.ReplicatorType.PUSH_AND_PULL; //{{ PUSH / PULL / PUSH_AND_PULL }}
+replicatorConfig.replicatorType = CBL.ReplicatorType.PUSH_AND_PULL; // optional. {{ PUSH / PULL / PUSH_AND_PULL }}
 
 
-let replicator = CBL.Replicator(replicatorConfig, function(result) { // replicator hash is stored in replicator object itself.
+let replicator = CBL.Replicator(replicatorConfig, function(result) { 
                     console.log("result:" + result);                 
               }, 
           function(error) {console.log(error)});
