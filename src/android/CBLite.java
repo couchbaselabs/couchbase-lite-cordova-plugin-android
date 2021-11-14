@@ -2,7 +2,6 @@ package com.couchbase.cblite;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.util.Pair;
 
 import com.couchbase.cblite.enums.ResultCode;
 import com.couchbase.cblite.objects.DatabaseArgument;
@@ -13,13 +12,10 @@ import com.couchbase.cblite.objects.FTSIndexArgument;
 import com.couchbase.cblite.objects.ListenerArgument;
 import com.couchbase.cblite.objects.LogArgument;
 import com.couchbase.cblite.objects.QueryArgument;
-import com.couchbase.cblite.objects.ReplicatorConfigHash;
 import com.couchbase.cblite.objects.ValueIndexArgument;
 import com.couchbase.cblite.utils.DatabaseManager;
-import com.couchbase.lite.AbstractReplicatorConfiguration;
 import com.couchbase.lite.BasicAuthenticator;
 import com.couchbase.lite.Database;
-import com.couchbase.lite.Log;
 import com.couchbase.lite.ReplicatorConfiguration;
 import com.couchbase.lite.ReplicatorType;
 import com.couchbase.lite.SessionAuthenticator;
@@ -94,51 +90,154 @@ public class CBLite extends CordovaPlugin {
     switch (action) {
 
       case ACTION_CREATE_OPEN_DATABASE:
-        this.createOrOpenDatabase(args, callbackContext);
+
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            createOrOpenDatabase(args, callbackContext);
+          }
+        });
+
         return true;
       case ACTION_CLOSE_DATABASE:
-        closeDatabase(args, callbackContext);
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            closeDatabase(args, callbackContext);
+          }
+        });
+
         return true;
       case ACTION_COPY_DATABASE:
-        copyDatabase(args, callbackContext);
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            copyDatabase(args, callbackContext);
+          }
+        });
+
         return true;
       case ACTION_DELETE_DATABASE:
-        deleteDatabase(args, callbackContext);
+
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            deleteDatabase(args, callbackContext);
+          }
+        });
         return true;
       case ACTION_ADD_CHANGE_LISTENER:
-        addChangeListener(args, callbackContext);
+
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            addChangeListener(args, callbackContext);
+          }
+        });
+
         return true;
       case ACTION_REMOVE_CHANGE_LISTENER:
-        removeChangeListener(args, callbackContext);
+
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            removeChangeListener(args, callbackContext);
+          }
+        });
+
         return true;
       case ACTION_SAVE_DOCUMENT:
-        saveDocument(args, callbackContext);
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            saveDocument(args, callbackContext);
+          }
+        });
+
         return true;
       case ACTION_GET_DOCUMENT:
-        getDocument(args, callbackContext);
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            getDocument(args, callbackContext);
+          }
+        });
+
         return true;
       case ACTION_MUTABLE_DOCUMENT_SET_STRING:
-        mutableDocumentSetString(args, callbackContext);
+
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            mutableDocumentSetString(args, callbackContext);
+          }
+        });
+
+
         return true;
 
       case ACTION_SAVE_BLOB:
-        saveBlob(args, callbackContext);
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            saveBlob(args, callbackContext);
+          }
+        });
+
         return true;
 
       case ACTION_SAVE_BLOB_EMBEDDED_RESOURCE:
-        saveBlobFromEmbeddedResource(args, callbackContext);
+
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            saveBlobFromEmbeddedResource(args, callbackContext);
+          }
+        });
         return true;
 
       case ACTION_SAVE_BLOB_FILE_URL:
-        saveBlobFromFileURL(args, callbackContext);
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            saveBlobFromFileURL(args, callbackContext);
+          }
+        });
+
         return true;
 
       case ACTION_GET_BLOB:
-        getBlob(args, callbackContext);
+
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            getBlob(args, callbackContext);
+          }
+        });
+
         return true;
 
       case ACTION_DELETE_DOCUMENT:
-        deleteDocument(args, callbackContext);
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            deleteDocument(args, callbackContext);
+          }
+        });
+
         return true;
 
       case ACTION_ENABLE_LOGGING:
@@ -151,6 +250,7 @@ public class CBLite extends CordovaPlugin {
         return true;
 
       case ACTION_QUERY_DATABASE:
+
         cordova.getThreadPool().execute(new Runnable() {
           @Override
           public void run() {
@@ -161,46 +261,126 @@ public class CBLite extends CordovaPlugin {
         return true;
 
       case ACTION_CREATE_VALUE_INDEX:
-        createValueIndex(args, callbackContext);
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            createValueIndex(args, callbackContext);
+          }
+        });
+
         return true;
 
       case ACTION_CREATE_FTS_INDEX:
-        createFTSIndex(args, callbackContext);
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            createFTSIndex(args, callbackContext);
+          }
+        });
+
         return true;
 
       case ACTION_DELETE_INDEX:
-        deleteIndex(args, callbackContext);
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            deleteIndex(args, callbackContext);
+          }
+        });
+
         return true;
 
       case ACTION_DATABASE_EXISTS:
-        databaseExists(args, callbackContext);
+
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            databaseExists(args, callbackContext);
+          }
+        });
+
         return true;
 
       case ACTION_REPLICATOR:
-        replicator(args, callbackContext);
+
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            initReplicator(args, callbackContext);
+          }
+        });
+
         return true;
 
       case ACTION_REPLICATOR_START:
-        replicatorStart(args, callbackContext);
+
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            replicatorStart(args, callbackContext);
+          }
+        });
+
         return true;
 
       case ACTION_REPLICATOR_STOP:
-        replicatorStop(args, callbackContext);
+
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            replicatorStop(args, callbackContext);
+          }
+        });
+
         return true;
 
       case ACTION_REPLICATOR_ADD_LISTENER:
-        replicatorAddListener(args, callbackContext);
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            replicatorAddListener(args, callbackContext);
+          }
+        });
         return true;
 
       case ACTION_REPLICATOR_REMOVE_LISTENER:
-        replicatorRemoveListener(args, callbackContext);
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            replicatorRemoveListener(args, callbackContext);
+          }
+        });
         return true;
 
       case QUERY_ADD_CHANGE_LISTENER:
-        queryAddChangeListener(args, callbackContext);
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            queryAddChangeListener(args, callbackContext);
+          }
+        });
+
         return true;
       case QUERY_REMOVE_CHANGE_LISTENER:
-        queryRemoveChangeListener(args, callbackContext);
+
+
+        cordova.getThreadPool().execute(new Runnable() {
+          @Override
+          public void run() {
+            queryRemoveChangeListener(args, callbackContext);
+          }
+        });
+
         return true;
       default:
         return false;
@@ -1213,7 +1393,7 @@ public class CBLite extends CordovaPlugin {
     }
   }
 
-  private void replicator(JSONArray args, CallbackContext callbackContext) {
+  private void initReplicator(JSONArray args, CallbackContext callbackContext) {
     try {
 
       ReplicatorConfiguration configuration = parseReplicatorConfiguration(args.getJSONObject(0), callbackContext);

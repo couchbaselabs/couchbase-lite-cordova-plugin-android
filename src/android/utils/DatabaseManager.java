@@ -792,6 +792,11 @@ public class DatabaseManager {
                 replicatorChange.put("completed", change.getStatus().getProgress().getCompleted());
                 replicatorChange.put("total", change.getStatus().getProgress().getTotal());
 
+                if (change.getStatus().getError() != null) {
+                  replicatorChange.put("errorCode", change.getStatus().getError().getCode());
+                  replicatorChange.put("error", change.getStatus().getError().getMessage());
+                }
+
                 String jsCallbackFn = replicatorResource.getReplicatorChangeListenerJSFunction();
 
                 if (jsCallbackFn != null && !jsCallbackFn.isEmpty()) {
