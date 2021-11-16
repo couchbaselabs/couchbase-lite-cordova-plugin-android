@@ -87,9 +87,8 @@ public class DatabaseManager {
       databases = new HashMap<>();
       queryResources = new HashMap<>();
       _replicatorResources = new HashMap<>();
-      CouchbaseLite.init(c);
     }
-
+    CouchbaseLite.init(c);
     return instance;
   }
 

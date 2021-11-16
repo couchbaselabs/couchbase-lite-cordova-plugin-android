@@ -91,7 +91,6 @@ public class CBLite extends CordovaPlugin {
 
       case ACTION_CREATE_OPEN_DATABASE:
 
-
         cordova.getThreadPool().execute(new Runnable() {
           @Override
           public void run() {
@@ -506,6 +505,8 @@ public class CBLite extends CordovaPlugin {
   private void createOrOpenDatabase(JSONArray args, CallbackContext callbackContext) {
 
     try {
+
+
       DatabaseArgument dbArguments = this.parseDatabaseArguments(args.getJSONObject(0), callbackContext);
       DatabaseManager dbMgr = DatabaseManager.getSharedInstance(context);
       ResultCode result = dbMgr.createOrOpenDatabase(dbArguments);
