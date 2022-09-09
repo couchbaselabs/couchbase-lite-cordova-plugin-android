@@ -53,6 +53,8 @@ The following is list of APIs (& features) exported by the plugin. Please refer 
 | removeChangeListener | Replicator | Removes the replication change listener. |
 
 
+## Sample App
+A full working sample app is available [here](https://github.com/couchbaselabs/userprofile-couchbase-mobile-cordova-android:)
 ## Getting Started
 
 ### Integrating the Plugin into your Ionic App
@@ -81,7 +83,7 @@ ionic cordova build android
 * Install the plugin by adding the appropriate Github repo. If you fork the repo and modify it, then be sure to point it to the right URL!
 
 ```bash
-ionic cordova plugin add https://github.com/rajagp/couchbase-lite-cordova-plugin-android.git
+ionic cordova plugin add https://github.com/couchbaselabs/couchbase-lite-cordova-plugin-android.git
 ```
 
 ### Adding couchbase-lite-android framework as a dependency
@@ -460,5 +462,4 @@ If you update the plugin such as adding a new API, don't forget to  remove the p
 ```
 ionic cordova plugin rm cordova.plugin.couchbaselite
 ```
-## Sample App
-A full working sample app is available [here](https://github.com/rajagp/userprofile-couchbase-mobile-cordova-android:)
+
