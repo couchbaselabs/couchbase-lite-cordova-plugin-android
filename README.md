@@ -54,7 +54,8 @@ The following is list of APIs (& features) exported by the plugin. Please refer 
 
 
 ## Sample App
-A full working sample app is available [here](https://github.com/couchbaselabs/userprofile-couchbase-mobile-cordova-android:)
+A sample app that uses this plugin is available [here](https://github.com/couchbaselabs/userprofile-couchbase-mobile-cordova-android:)
+
 ## Getting Started
 
 ### Integrating the Plugin into your Ionic App
