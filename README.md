@@ -19,7 +19,7 @@ The Cordova plugin  exports a subset of native Couchbase Lite APIs and makes it 
 ![](https://i0.wp.com/blog.couchbase.com/wp-content/uploads/2018/10/JS-stuff.jpg?w=900)
 
 ## Exported APIs
-The following is list of APIs (& features) exported by the plugin. Please refer to the Couchbase Lite native []API specification](https://docs.couchbase.com/mobile/3.0.0-beta02/couchbase-lite-android/com/couchbase/lite/package-summary.html) for an authoritative description of the API functionality. As indicated earlier, in some cases, the plugin isn't a simple passthrough. There is additional logic implemented by the plugin so there may not be an exact 1:1 correlation with the native API definitions. 
+The following is list of APIs (& features) exported by the plugin. Please refer to the Couchbase Lite native [API specification](https://docs.couchbase.com/mobile/3.0.0/couchbase-lite-android/com/couchbase/lite/package-summary.html) for an authoritative description of the API functionality. As indicated earlier, in some cases, the plugin isn't a simple passthrough. There is additional logic implemented by the plugin so there may not be an exact 1:1 correlation with the native API definitions. 
 
 
 | API methods | Native Class | Description |
@@ -56,7 +56,7 @@ The following is list of APIs (& features) exported by the plugin. Please refer 
 
 
 ## Sample App
-A sample app that uses this plugin is available [here](https://github.com/couchbaselabs/userprofile-couchbase-mobile-cordova-android:)
+A sample app that uses this plugin is available [here](https://github.com/couchbaselabs/userprofile-couchbase-mobile-cordova-android).
 
 ## Getting Started
 
