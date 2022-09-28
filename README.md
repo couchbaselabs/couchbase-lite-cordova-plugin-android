@@ -2,11 +2,13 @@
 
 A reference implementation of a [cordova native plugin](https://cordova.apache.org/docs/en/10.x/guide/hybrid/plugins/index.html) for [couchbase lite on Android](https://docs.couchbase.com/couchbase-lite/3.0/android/quickstart.html). 
 
+The plugin is **not officially supported** by Couchbase. It is intended to be used as a reference. You can extend this plugin to expose other relevant APIs per [plugin development guide](https://cordova.apache.org/docs/en/10.x/guide/platforms/android/plugin.html) 
+
+
 In order to use Couchbase Lite as an embedded database within your Cordova-based app, you will need a way to access Couchbase Lite’s native APIs from within your Cordova web application. Cordova plugins allow web-based apps running in a Cordova webview to access native platform functionality through a Javascript interface.
 
 The Cordova plugin  exports a subset of native Couchbase Lite APIs and makes it available to Cordova apps. The plugin isn't a simple passthrough layer. It also acts as a DAO layer and implements additional logic (like a database manager) on top of the underlying native API layer to simplify JS app implementation. 
 
-The plugin is not officially supported by Couchbase. It is intended to be used as a reference. You can extend this plugin to expose other relevant APIs per [plugin development guide](https://cordova.apache.org/docs/en/10.x/guide/platforms/android/plugin.html) 
 
 *NOTE*: The plugin **does not** bundle Couchbase Lite native framework. You will include Couchbase Lite library when building your Cordova or Ionic app. The Getting Started instructions below describe the same.
 
